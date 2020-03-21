@@ -36,7 +36,7 @@ public class WorldEngine : MonoBehaviour
   public void generateWorld() {
 
     Debug.Log("Generating World");
-    mesh = meshFilter.mesh;
+    mesh = meshFilter.sharedMesh;
     mesh.Clear();
 
     // Noise Map Provider for all types of Noise
@@ -53,7 +53,15 @@ public class WorldEngine : MonoBehaviour
     
     // render the mesh
     Debug.Log("Generating Mesh");
-    meshFilter.mesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve);
+    
+    // destroy the previous mesh collider 
+    DestroyImmediate(this.GetComponent<MeshCollider>());
+
+    // generate the new mesh
+    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve);
+
+    // update the mesh collider
+    gameObject.AddComponent<MeshCollider>();
 
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, noiseMap);
