@@ -45,3 +45,10 @@ public class NoiseMapRenderer
     return colorMap;
   }
 }
+
+[System.Serializable]
+public struct TerrainType {
+    public float threshold;
+    public string name;
+    public Color color;
+}
