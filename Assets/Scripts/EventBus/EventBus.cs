@@ -14,6 +14,7 @@ public class EventBus : MonoBehaviour
   public enum Actions
   {
     GENERATE_WORLD,
+    GENERATE_WORLD_COMPLETE,
     GENERATE_CHUNK
   };
 
@@ -62,7 +63,7 @@ public class EventBus : MonoBehaviour
   {
     string eventName = broadcastEvent.ToString();
     var subscribers = Events[eventName];
-
+ 
     foreach (var sub in subscribers)
     {
       sub();

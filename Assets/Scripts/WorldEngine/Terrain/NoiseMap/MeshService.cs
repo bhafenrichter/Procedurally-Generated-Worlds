@@ -21,7 +21,6 @@ public class MeshService {
         initialHeight = heightCurve.Evaluate(initialHeight) * heightMultipler;
         vertices.Add(new Vector3(x, initialHeight, y));
       }
-      y+= 19;
     }
 
     generatedVerticles = vertices.ToArray();
@@ -49,7 +48,6 @@ public class MeshService {
         tris += 6;
       }
       vert++;
-      i+= 19;
     }
 
     // apply the trinagles to the mesh

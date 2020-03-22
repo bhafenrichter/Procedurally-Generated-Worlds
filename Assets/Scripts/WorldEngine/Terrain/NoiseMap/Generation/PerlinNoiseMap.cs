@@ -35,12 +35,12 @@ class PerlinNoiseMap : _INoiseMap
 
           for (var i = 0; i < octaves; i++) {
             // calculate sample indices based on the coordinates and the scale
-            float sampleX = (float) x / scale * frequency;
-            float sampleZ = (float) y / scale * frequency;
+            float sampleX = (float) (x + (chunkX * height)) / scale * frequency;
+            float sampleZ = (float) (y + (chunkY * height)) / scale * frequency;
 
             // add seed offset and the chunk coordinates
-            sampleX += seed + chunkX;
-            sampleZ += seed + chunkY;
+            sampleX += seed;
+            sampleZ += seed;
 
             // generate noise value using PerlinNoise
             float noise = Mathf.PerlinNoise(sampleX, sampleZ) * 2 - 1;
