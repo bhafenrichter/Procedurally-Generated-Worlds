@@ -32,14 +32,12 @@ public class NoiseMapRenderer
         int colorIndex = zIndex * tileWidth + xIndex;
         float height = heightMap[zIndex, xIndex];
         // assign as color a shade of grey proportional to the height value
-
         for (var i = 0; i < terrainConfigs.Length; i++) {
           if (terrainConfigs[i].threshold > height) {
             colorMap[colorIndex] = terrainConfigs[i].color;
             break;
           }
         }
-        //  = Color.Lerp(Color.black, Color.white, height);
       }
     }
     return colorMap;

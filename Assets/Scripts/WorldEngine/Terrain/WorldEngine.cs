@@ -18,7 +18,7 @@ public class WorldEngine : MonoBehaviour
 
   private NoiseMapService NoiseMapService;
   private MeshService MeshService;
-  public Mesh mesh;
+  private Mesh debugMesh;
   
   void Start()
   {
@@ -46,6 +46,7 @@ public class WorldEngine : MonoBehaviour
 
     ClearChunks();
 
+    
     generateChunk(0, 0);
     generateChunk(1, 0);
     generateChunk(0, 1);
@@ -55,7 +56,7 @@ public class WorldEngine : MonoBehaviour
     // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE);
   }
 
-  public void generateChunk(int chunkX, int chunkY) {
+  public Mesh generateChunk(int chunkX, int chunkY) {
     // debugging instances only
     MeshService = new MeshService();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
@@ -83,6 +84,7 @@ public class WorldEngine : MonoBehaviour
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
+    return mesh;
   }
 
   public string getChunkName(int x, int y) {
@@ -129,10 +131,10 @@ public class WorldEngine : MonoBehaviour
   }
 
   // private void OnDrawGizmos() {
-  //     if (mesh.vertices != null) {
+  //     if (debugMesh != null && debugMesh.vertices != null) {
   //         Gizmos.color = Color.red;
-  //         for (var i = 0; i < mesh.vertices.Length; i++) {
-  //             Gizmos.DrawSphere(mesh.vertices[i], 0.1f);
+  //         for (var i = 0; i < debugMesh.vertices.Length; i++) {
+  //             Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
   //         }
   //     }
   // }

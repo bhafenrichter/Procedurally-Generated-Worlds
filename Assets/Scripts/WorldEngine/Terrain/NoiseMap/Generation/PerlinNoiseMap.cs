@@ -25,9 +25,9 @@ class PerlinNoiseMap : _INoiseMap
       float maxHeight = float.MinValue;
       float minHeight = float.MaxValue;
 
-      for (int x = 0; x < width; x++)
+      for (int x = 0; x < noiseMap.GetLength(0); x++)
       {
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < noiseMap.GetLength(1); y++)
         {
           float frequency = 1;
           float amplitude = 1;
@@ -57,9 +57,9 @@ class PerlinNoiseMap : _INoiseMap
         }
       }
 
-      for (var x = 0; x < width; x++) {
-        for (var y = 0; y < height; y++) {
-          noiseMap[(int) x, (int) y] = Mathf.InverseLerp(minHeight, maxHeight, noiseMap[x,y]);
+      for (var x = 0; x < noiseMap.GetLength(0); x++) {
+        for (var y = 0; y < noiseMap.GetLength(1); y++) {
+          noiseMap[(int) x, (int) y] = Mathf.InverseLerp(-2.5f, 2.5f, noiseMap[x,y]);
         }
       }
 
