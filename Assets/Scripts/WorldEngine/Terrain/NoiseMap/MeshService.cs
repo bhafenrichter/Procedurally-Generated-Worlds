@@ -74,4 +74,9 @@ public class MeshService {
     
     return mesh;
   }
+
+  public MeshFilter generateNewMesh() {
+    var Mesh = new MeshFilter();
+    return Mesh;
+  }
 }

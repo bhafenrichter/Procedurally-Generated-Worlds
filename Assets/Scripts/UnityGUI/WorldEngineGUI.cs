@@ -14,6 +14,13 @@ public class WorldEngineGUI : Editor
             // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD);
             GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateWorld();
         }
+
+
+         if (GUILayout.Button("Generate Chunk"))
+        {
+            // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_CHUNK);
+            GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateChunk(0,1);
+        }
     }
 
 }

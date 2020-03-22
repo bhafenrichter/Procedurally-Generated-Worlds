@@ -18,7 +18,7 @@ class PerlinNoiseMap : _INoiseMap
       this.persistance = persistance;
       this.octaves = octaves;
     }
-    public float[,] generateNoise () {
+    public float[,] generateNoise (int chunkX, int chunkY) {
       // create an empty noise map with the mapDepth and mapWidth coordinates
       float[,] noiseMap = new float[width + 1, height + 1];
 
@@ -38,8 +38,12 @@ class PerlinNoiseMap : _INoiseMap
             float sampleX = (float) x / scale * frequency;
             float sampleZ = (float) y / scale * frequency;
 
+            // add seed offset and the chunk coordinates
+            sampleX += seed + chunkX;
+            sampleZ += seed + chunkY;
+
             // generate noise value using PerlinNoise
-            float noise = Mathf.PerlinNoise(sampleX + seed, sampleZ + seed) * 2 - 1;
+            float noise = Mathf.PerlinNoise(sampleX, sampleZ) * 2 - 1;
             noiseHeight += noise * amplitude;
 
             amplitude *= persistance;

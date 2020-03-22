@@ -13,14 +13,14 @@ public class NoiseMapService {
     NoiseRenderer = new NoiseMapRenderer();
   }
 
-  public float[,] getNoiseMap(string noiseType) {
+  public float[,] getNoiseMap(string noiseType, int chunkX, int chunkY) {
     switch (noiseType) {
       case "Perlin": {
-        return PerlinNoise.generateNoise();
+        return PerlinNoise.generateNoise(chunkX, chunkY);
       }
       default: {
         // default to perlin
-        return PerlinNoise.generateNoise();
+        return PerlinNoise.generateNoise(chunkX, chunkY);
       }
     }
   }

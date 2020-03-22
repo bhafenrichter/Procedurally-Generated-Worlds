@@ -7,5 +7,5 @@ interface _INoiseMap
     float persistance { get; set; }
     float lacunarity { get; set; }
     int octaves { get; set; }
-    float[,] generateNoise();
+    float[,] generateNoise(int chunkX, int chunkY);
 }

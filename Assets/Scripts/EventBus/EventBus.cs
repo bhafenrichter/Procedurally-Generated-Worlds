@@ -13,7 +13,8 @@ public class EventBus : MonoBehaviour
 // potential event actions
   public enum Actions
   {
-    GENERATE_WORLD
+    GENERATE_WORLD,
+    GENERATE_CHUNK
   };
 
   void Awake()
