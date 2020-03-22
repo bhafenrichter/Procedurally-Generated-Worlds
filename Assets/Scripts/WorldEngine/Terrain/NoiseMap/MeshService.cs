@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class MeshService {
-  internal Mesh GenerateMesh(Mesh mesh, int mapSize, float[,] noiseMap, float heightMultipler, AnimationCurve heightCurve)
+  internal Mesh GenerateMesh(Mesh mesh, int mapSize, float[,] noiseMap, float heightMultipler, AnimationCurve heightCurve, int vertexPrecision)
   {
     Vector3[] generatedVerticles;
     List<Vector3> vertices = new List<Vector3>();
@@ -10,9 +10,13 @@ public class MeshService {
     // cleare the previous mesh
     mesh.Clear();
 
-    for (var y = 0; y < mapSize + 1; y++)
+    // mesh simplfication needs to be a factor of the map size
+    int meshSimplificationIncrement = vertexPrecision == 0 ? 1 : vertexPrecision * 2;
+    int verticesPerLine = (mapSize - 1) / meshSimplificationIncrement + 1;
+
+    for (var y = 0; y < mapSize + 1; y+= meshSimplificationIncrement)
     {
-      for (var x = 0; x < mapSize + 1; x++)
+      for (var x = 0; x < mapSize + 1; x+= meshSimplificationIncrement)
       {
         // vertices.Add(new Vector3(x, 0, y));
         float initialHeight = noiseMap[x,y];
@@ -31,16 +35,16 @@ public class MeshService {
     int vert = 0;
     int tris = 0;
 
-    for (int i = 0; i < mapSize; i++)
+    for (int i = 0; i < mapSize; i+= meshSimplificationIncrement)
     {
-      for (int j = 0; j < mapSize; j++)
+      for (int j = 0; j < mapSize; j+= meshSimplificationIncrement)
       {
         triangles[tris + 0] = vert;
-        triangles[tris + 1] = vert + mapSize + 1;
+        triangles[tris + 1] = vert + verticesPerLine + 1;
         triangles[tris + 2] = vert + 1;
         triangles[tris + 3] = vert + 1;
-        triangles[tris + 4] = vert + mapSize + 1;
-        triangles[tris + 5] = vert + mapSize + 2;
+        triangles[tris + 4] = vert + verticesPerLine + 1;
+        triangles[tris + 5] = vert + verticesPerLine + 2;
 
         vert++;
         tris += 6;

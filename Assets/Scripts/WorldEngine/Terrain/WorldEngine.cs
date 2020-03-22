@@ -73,7 +73,7 @@ public class WorldEngine : MonoBehaviour
     float[,] noiseMap = NoiseMapService.getNoiseMap("Perlin", chunkX, chunkY);
 
     // generate the new mesh
-    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve);
+    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve, vertexPrecision);
 
     // destroy the previous mesh collider 
     DestroyImmediate(chunk.GetComponent<MeshCollider>());
