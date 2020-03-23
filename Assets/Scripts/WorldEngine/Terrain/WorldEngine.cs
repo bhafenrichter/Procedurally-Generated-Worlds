@@ -2,9 +2,9 @@
 
 public class WorldEngine : MonoBehaviour
 {
+  // configuration setttings for map generation
   public AnimationCurve heightCurve;
   public float heightMultipler;
-  // configuration setttings for map generation
   public int seed;
   public int mapSize;
   public float scale = 5f;
@@ -12,7 +12,7 @@ public class WorldEngine : MonoBehaviour
   public float persistance = 1f;
   public int octaves = 1;
   public int vertexPrecision;
-  public string noiseType = "Perlin";
+  public string noiseType;
   public TerrainType[] terrainConfigs;
   public GameObject Chunks;
 
@@ -69,8 +69,7 @@ public class WorldEngine : MonoBehaviour
     var mesh = meshFilter.mesh;
 
     // Noise Map Provider for all types of Noises
-    NoiseMapService.getNoiseMap("Perlin", chunkX, chunkY);
-    float[,] noiseMap = NoiseMapService.getNoiseMap("Perlin", chunkX, chunkY);
+    float[,] noiseMap = NoiseMapService.getNoiseMap(noiseType, chunkX, chunkY);
 
     // generate the new mesh
     meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve, vertexPrecision);

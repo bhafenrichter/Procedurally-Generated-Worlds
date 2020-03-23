@@ -3,11 +3,14 @@ using UnityEngine;
 
 public class NoiseMapService {
   PerlinNoiseMap PerlinNoise;
+  SimplexNoiseMap SimplexNoise;
+  
   NoiseMapRenderer NoiseRenderer;
   public NoiseMapService(int seed, int width, int height, float scale, float persistance, float lacunarity, int octaves) {
 
     // initialize all of the different noise providers
     PerlinNoise = new PerlinNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
+    SimplexNoise = new SimplexNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
 
     // initialize renderer
     NoiseRenderer = new NoiseMapRenderer();
@@ -17,6 +20,9 @@ public class NoiseMapService {
     switch (noiseType) {
       case "Perlin": {
         return PerlinNoise.generateNoise(chunkX, chunkY);
+      }
+      case "Simplex": {
+        return SimplexNoise.generateNoise(chunkX, chunkY);
       }
       default: {
         // default to perlin
