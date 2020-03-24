@@ -26,19 +26,13 @@ public class WorldEngine : MonoBehaviour
     MeshService = new MeshService();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
 
-    generateWorld();
-
     // subscribe to the generate world event
     EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD, generateWorld);
-    // EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_CHUNK, generateChunk);
+
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD, "");
   }
 
-  void Update()
-  {
-
-  }
-
-  public void generateWorld() {
+  public void generateWorld(dynamic parameters) {
     // debugging instances only
     MeshService = new MeshService();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
@@ -47,13 +41,13 @@ public class WorldEngine : MonoBehaviour
     ClearChunks();
 
     
-    generateChunk(0, 0);
+    debugMesh = generateChunk(0, 0);
     generateChunk(1, 0);
     generateChunk(0, 1);
     generateChunk(1, 1);
     
     // notify other modules in the generator that the terrain is complete
-    // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE);
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, debugMesh);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
@@ -83,6 +77,9 @@ public class WorldEngine : MonoBehaviour
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
+
+    // render the trees
+
     return mesh;
   }
 
@@ -125,16 +122,15 @@ public class WorldEngine : MonoBehaviour
       if (children[i].gameObject != Chunks) {
         DestroyImmediate(children[i].gameObject);
       }
-      
     }
   }
 
-  // private void OnDrawGizmos() {
-  //     if (debugMesh != null && debugMesh.vertices != null) {
-  //         Gizmos.color = Color.red;
-  //         for (var i = 0; i < debugMesh.vertices.Length; i++) {
-  //             Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
-  //         }
-  //     }
-  // }
+  private void OnDrawGizmos() {
+      if (debugMesh != null && debugMesh.vertices != null) {
+          Gizmos.color = Color.red;
+          for (var i = 0; i < debugMesh.vertices.Length; i++) {
+              Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
+          }
+      }
+  }
 }
