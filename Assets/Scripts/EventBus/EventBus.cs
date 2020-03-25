@@ -8,7 +8,7 @@ public class EventBus : MonoBehaviour
 
   public static EventBus Manager { get; private set; }
 
-  private Dictionary<string, List<Action<dynamic>>> Events;
+  private Dictionary<string, List<Action<dynamic,dynamic>>> Events;
 
 // potential event actions
   public enum Actions
@@ -21,7 +21,7 @@ public class EventBus : MonoBehaviour
   void Awake()
   {
     // events are tied to a hashset
-    Events = new Dictionary<string, List<Action<dynamic>>>();
+    Events = new Dictionary<string, List<Action<dynamic,dynamic>>>();
 
     if (Manager == null && Manager != this)
     {
@@ -33,10 +33,10 @@ public class EventBus : MonoBehaviour
     // DontDestroyOnLoad(gameObject);
   }
 
-  public void Subscribe(Actions subscribeAction, Action<dynamic> Subscriber)
+  public void Subscribe(Actions subscribeAction, Action<dynamic,dynamic> Subscriber)
   {    
     string eventName = subscribeAction.ToString();
-    List<Action<dynamic>> currentActions = new List<Action<dynamic>>();
+    List<Action<dynamic,dynamic>> currentActions = new List<Action<dynamic,dynamic>>();
 
     if (Events.ContainsKey(eventName)) {
       // get the events and add it to the end
@@ -59,14 +59,14 @@ public class EventBus : MonoBehaviour
     Events.Clear();
   }
 
-  public void Broadcast(Actions broadcastEvent, dynamic parameter)
+  public void Broadcast(Actions broadcastEvent, dynamic parameter, dynamic parameter2)
   {
     string eventName = broadcastEvent.ToString();
     var subscribers = Events[eventName];
  
     foreach (var sub in subscribers)
     {
-      sub(parameter);
+      sub(parameter, parameter2);
     }
   }
 }

@@ -11,15 +11,15 @@ public class WorldEngineGUI : Editor
         WorldEngine myScript = (WorldEngine)target;
         if (GUILayout.Button("Generate World"))
         {
-            EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD, "");
-            // GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateWorld("");
+            // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD, "");
+            GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateWorld("", "");
         }
 
 
          if (GUILayout.Button("Generate Chunk"))
         {
-            EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_CHUNK, "");
-            // GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateChunk(0,1);
+            // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_CHUNK, "");
+            GameObject.Find("WorldEngine").GetComponent<WorldEngine>().generateChunk(0,1);
         }
     }
 

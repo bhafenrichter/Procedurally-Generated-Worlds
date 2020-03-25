@@ -29,10 +29,10 @@ public class WorldEngine : MonoBehaviour
     // subscribe to the generate world event
     EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD, generateWorld);
 
-    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD, "");
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD, "", "");
   }
 
-  public void generateWorld(dynamic parameters) {
+  public void generateWorld(dynamic parameters, dynamic dummy) {
     // debugging instances only
     MeshService = new MeshService();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
@@ -40,14 +40,18 @@ public class WorldEngine : MonoBehaviour
 
     ClearChunks();
 
-    
-    debugMesh = generateChunk(0, 0);
+    generateChunk(0, 0);
     generateChunk(1, 0);
     generateChunk(0, 1);
     generateChunk(1, 1);
     
+    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,0);
+    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,1);
+    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,0);
+    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,1);
+    
     // notify other modules in the generator that the terrain is complete
-    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, debugMesh);
+    // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, debugMesh);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
@@ -82,15 +86,10 @@ public class WorldEngine : MonoBehaviour
 
     return mesh;
   }
-
-  public string getChunkName(int x, int y) {
-    return x + "-" + y;
-  }
-
   public GameObject loadChunk(int chunkX, int chunkY) {
 
     // check to see if chunk is already generated
-    string chunkName = getChunkName(chunkX, chunkY);
+    string chunkName = Utils.getChunkName(chunkX, chunkY);
 
     Transform chunkTransform = Chunks.transform.Find(chunkName);
     GameObject chunk;
