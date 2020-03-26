@@ -20,7 +20,6 @@ public class TreeService : MonoBehaviour {
     int chunkX = (int) offsetX;
     int chunkY = (int) offsetY;
 
-    // MUST BE THE PRECISION OF THE WORLDENGINE
     int precision = gameObject.transform.parent.GetComponent<WorldEngine>().vertexPrecision;
 
     // dynamic casting
@@ -30,9 +29,15 @@ public class TreeService : MonoBehaviour {
     int mapSize = ((int) Mathf.Sqrt(meshVertices.Length) - 1);
 
     // create trees game object for chunk
-    GameObject trees = new GameObject();
-    trees.name = "Trees";
-    trees.transform.parent = chunk.transform;
+    Transform treesTransform = chunk.transform.Find("Trees");
+    GameObject trees = treesTransform != null ? treesTransform.gameObject : null;
+    if (trees == null) {
+      trees = new GameObject();
+      trees.name = "Trees";
+      trees.transform.parent = chunk.transform;
+    }    
+
+    ClearTrees(trees);
 
     // generate points for trees
     Vector3[] treePoints = generateTreePoints(precision, meshVertices);
@@ -59,7 +64,7 @@ public class TreeService : MonoBehaviour {
       int verticesIndex = (int) ((mapSize + 1) * (int) current.x) + (int) current.y;
       float height = vertices[verticesIndex].y;
       
-      if (height != 0 && height > minTreeHeightThreshold && height < maxTreeHeightThreshold) {
+      if (height >= minTreeHeightThreshold && height <= maxTreeHeightThreshold) {
         trees.Add(new Vector3(current.y * 2 * precision, height, current.x * 2 * precision));
       }
       
@@ -68,13 +73,10 @@ public class TreeService : MonoBehaviour {
     return trees.ToArray();
   }
 
-  // public void ClearTrees() {
-  //   Transform parent = gameObject.transform.GetChild(0);
-  //   Transform[] children = parent.transform.GetComponentsInChildren<Transform>(true);
-  //   for (var i = 0; i < children.Length; i++) {
-  //     if (children[i].name != "Trees") {
-  //       DestroyImmediate(children[i].gameObject);
-  //     }
-  //   }
-  // }
+  public void ClearTrees(GameObject trees) {
+    foreach(Transform child in trees.transform)
+    {
+        DestroyImmediate(child.gameObject);
+    }
+  }
 }

@@ -18,9 +18,9 @@ public class MeshService {
     {
       for (var x = 0; x < mapSize + 1; x+= meshSimplificationIncrement)
       {
-        // vertices.Add(new Vector3(x, 0, y));
         float initialHeight = noiseMap[x,y];
         initialHeight = heightCurve.Evaluate(initialHeight) * heightMultipler;
+        // vertices.Add(new Vector3(x, 0, y));
         vertices.Add(new Vector3(x, initialHeight, y));
       }
     }

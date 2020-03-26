@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class WorldEngine : MonoBehaviour
 {
@@ -116,12 +117,12 @@ public class WorldEngine : MonoBehaviour
   }
 
   public void ClearChunks() {
-    var children = Chunks.GetComponentsInChildren<Transform>(true);
-    for (var i = 0; i < children.Length; i++) {
-      if (children[i].gameObject != Chunks) {
-        DestroyImmediate(children[i].gameObject);
-      }
-    }
+    DestroyImmediate(Chunks);
+
+    GameObject freshChunk = new GameObject();
+    freshChunk.transform.parent = gameObject.transform;
+    freshChunk.name = "Chunks";
+    Chunks = freshChunk;
   }
 
   private void OnDrawGizmos() {
