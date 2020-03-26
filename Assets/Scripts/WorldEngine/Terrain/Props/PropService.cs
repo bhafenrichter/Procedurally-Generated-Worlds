@@ -1,21 +1,21 @@
 using UnityEngine;
 using System.Collections.Generic;
-public class TreeService : MonoBehaviour {
+public class PropService : MonoBehaviour {
   
-  [Range(0, 5)]
-  public float minTreeHeightThreshold;
+  [Range(0, 100)]
+  public float minPropHeightThreshold;
 
-  [Range(0, 5)]
-  public float maxTreeHeightThreshold;
-  public float treeRadius;
-  public string generationType;
-  public GameObject[] treePrefabs;
+  [Range(0, 100)]
+  public float maxPropHeightThreshold;
+  public string propName;
+  public float propRadius;
+  public GameObject[] propPrefabs;
   void Start () {
-    EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD_COMPLETE, populateTrees);
+    EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD_COMPLETE, populateProps);
   }
 
-  internal void populateTrees(dynamic offsetX, dynamic offsetY) {
-    Debug.Log("Generating Trees");
+  internal void populateProps(dynamic offsetX, dynamic offsetY) {
+    Debug.Log("Generating " + propName);
 
     int chunkX = (int) offsetX;
     int chunkY = (int) offsetY;
@@ -29,11 +29,11 @@ public class TreeService : MonoBehaviour {
     int mapSize = ((int) Mathf.Sqrt(meshVertices.Length) - 1);
 
     // create trees game object for chunk
-    Transform treesTransform = chunk.transform.Find("Trees");
+    Transform treesTransform = chunk.transform.Find(propName);
     GameObject trees = treesTransform != null ? treesTransform.gameObject : null;
     if (trees == null) {
       trees = new GameObject();
-      trees.name = "Trees";
+      trees.name = propName;
       trees.transform.parent = chunk.transform;
     }    
 
@@ -43,9 +43,9 @@ public class TreeService : MonoBehaviour {
     Vector3[] treePoints = generateTreePoints(precision, meshVertices);
 
     for (var i = 0; i < treePoints.Length; i++) {
-      int seed = UnityEngine.Random.Range(0, treePrefabs.Length);
+      int seed = UnityEngine.Random.Range(0, propPrefabs.Length);
       Vector3 position = new Vector3(treePoints[i].x, treePoints[i].y, treePoints[i].z);
-      GameObject tree = GameObject.Instantiate(treePrefabs[seed], position, treePrefabs[seed].transform.rotation);
+      GameObject tree = GameObject.Instantiate(propPrefabs[seed], position, propPrefabs[seed].transform.rotation);
       tree.transform.parent = trees.transform;
     }
     trees.transform.position = new Vector3(chunkX * (mapSize * 2), 0, chunkY * (mapSize * 2));
@@ -56,7 +56,7 @@ public class TreeService : MonoBehaviour {
     // multiply by vertex percision
     int mapSize = ((int) Mathf.Sqrt(vertices.Length) - 1);
     // depending on the precision of the vertices, we'll need to adjust the mapsize to be 1:1 with the precision
-    List<Vector2> poissonPoints = PoissonDiscSampling.GeneratePoints(treeRadius, new Vector2(mapSize / precision, mapSize / precision), 30);
+    List<Vector2> poissonPoints = PoissonDiscSampling.GeneratePoints(propRadius, new Vector2(mapSize / precision, mapSize / precision), 30);
     List<Vector3> trees = new List<Vector3>();
 
     for (var i = 0; i < poissonPoints.Count; i++) {
@@ -64,7 +64,7 @@ public class TreeService : MonoBehaviour {
       int verticesIndex = (int) ((mapSize + 1) * (int) current.x) + (int) current.y;
       float height = vertices[verticesIndex].y;
       
-      if (height >= minTreeHeightThreshold && height <= maxTreeHeightThreshold) {
+      if (height >= minPropHeightThreshold && height <= maxPropHeightThreshold) {
         trees.Add(new Vector3(current.y * 2 * precision, height, current.x * 2 * precision));
       }
       

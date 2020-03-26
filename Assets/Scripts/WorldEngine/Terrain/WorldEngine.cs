@@ -46,13 +46,13 @@ public class WorldEngine : MonoBehaviour
     generateChunk(0, 1);
     generateChunk(1, 1);
     
-    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,0);
-    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,1);
-    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,0);
-    GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,1);
+    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,0);
+    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,1);
+    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,0);
+    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,1);
     
     // notify other modules in the generator that the terrain is complete
-    // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, debugMesh);
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, 0, 0);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
