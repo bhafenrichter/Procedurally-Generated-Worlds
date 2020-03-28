@@ -31,11 +31,11 @@ public class NoiseMapService {
     }
   }
 
-  public Texture2D getNoiseTexture(TerrainType[] terrainConfig, float[,] noiseMap) {
-    return NoiseRenderer.BuildTexture(terrainConfig, noiseMap);
+  public Texture2D getNoiseTexture(TerrainType[] terrainConfig, AnimationCurve heightCurve, float[,] noiseMap) {
+    return NoiseRenderer.BuildTexture(terrainConfig, heightCurve, noiseMap);
   }
 
-  public Color[] getNoiseColorMap(TerrainType[] terrainConfig, float[,] noiseMap) {
-    return NoiseRenderer.BuildPixelData(terrainConfig, noiseMap);
+  public Color[] getNoiseColorMap(TerrainType[] terrainConfig, AnimationCurve heightCurve, float[,] noiseMap) {
+    return NoiseRenderer.BuildPixelData(terrainConfig, heightCurve, noiseMap);
   }
 }

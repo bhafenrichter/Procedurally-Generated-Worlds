@@ -45,14 +45,6 @@ public class WorldEngine : MonoBehaviour
     generateChunk(1, 0);
     generateChunk(0, 1);
     generateChunk(1, 1);
-    
-    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,0);
-    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(0,1);
-    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,0);
-    // GameObject.Find("TreeEngine").GetComponent<TreeService>().populateTrees(1,1);
-    
-    // notify other modules in the generator that the terrain is complete
-    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, 0, 0);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
@@ -80,10 +72,12 @@ public class WorldEngine : MonoBehaviour
     chunk.AddComponent<MeshCollider>();
 
     // render mesh texture
-    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, noiseMap);
+    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, heightCurve, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
 
-    // render the trees
+
+    // notify other modules in the generator that the terrain is complete
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);
 
     return mesh;
   }

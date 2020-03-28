@@ -41,6 +41,7 @@ public class EventBus : MonoBehaviour
     if (Events.ContainsKey(eventName)) {
       // get the events and add it to the end
       currentActions = Events[eventName];
+      Events.Remove(eventName);
     }
     
     currentActions.Add(Subscriber);

@@ -2,10 +2,10 @@ using UnityEngine;
 using System.Collections.Generic;
 public class PropService : MonoBehaviour {
   
-  [Range(0, 100)]
+  [Range(0, 1)]
   public float minPropHeightThreshold;
 
-  [Range(0, 100)]
+  [Range(0, 1)]
   public float maxPropHeightThreshold;
   public string propName;
   public float propRadius;
@@ -21,6 +21,7 @@ public class PropService : MonoBehaviour {
     int chunkY = (int) offsetY;
 
     int precision = gameObject.transform.parent.GetComponent<WorldEngine>().vertexPrecision;
+    float heightMultipler = gameObject.transform.parent.GetComponent<WorldEngine>().heightMultipler;
 
     // dynamic casting
     GameObject chunk = GameObject.Find(Utils.getChunkName(offsetX, offsetY));
@@ -40,7 +41,7 @@ public class PropService : MonoBehaviour {
     ClearTrees(trees);
 
     // generate points for trees
-    Vector3[] treePoints = generateTreePoints(precision, meshVertices);
+    Vector3[] treePoints = generateTreePoints(precision, heightMultipler, meshVertices);
 
     for (var i = 0; i < treePoints.Length; i++) {
       int seed = UnityEngine.Random.Range(0, propPrefabs.Length);
@@ -51,7 +52,7 @@ public class PropService : MonoBehaviour {
     trees.transform.position = new Vector3(chunkX * (mapSize * 2), 0, chunkY * (mapSize * 2));
   }
 
-  internal Vector3[] generateTreePoints(int precision, Vector3[] vertices) {
+  internal Vector3[] generateTreePoints(int precision, float heightMultiplier, Vector3[] vertices) {
     // use poisson disk sampling to generate clustered points
     // multiply by vertex percision
     int mapSize = ((int) Mathf.Sqrt(vertices.Length) - 1);
@@ -64,7 +65,12 @@ public class PropService : MonoBehaviour {
       int verticesIndex = (int) ((mapSize + 1) * (int) current.x) + (int) current.y;
       float height = vertices[verticesIndex].y;
       
-      if (height >= minPropHeightThreshold && height <= maxPropHeightThreshold) {
+      // the heights aren't the heights from the heightmap, but the mesh.  These 
+      // need to be scaled back down to the noisemap values to get the correct
+      // data
+      float normalizedHeight = Mathf.Lerp(0f, 1f, height / heightMultiplier);
+      
+      if (normalizedHeight >= minPropHeightThreshold && normalizedHeight <= maxPropHeightThreshold) {
         trees.Add(new Vector3(current.y * 2 * precision, height, current.x * 2 * precision));
       }
       
