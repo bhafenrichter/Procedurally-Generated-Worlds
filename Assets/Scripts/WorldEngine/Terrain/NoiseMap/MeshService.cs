@@ -11,7 +11,7 @@ public class MeshService {
     mesh.Clear();
 
     // mesh simplfication needs to be a factor of the map size
-    int meshSimplificationIncrement = vertexPrecision == 0 ? 1 : vertexPrecision * 2;
+    int meshSimplificationIncrement = vertexPrecision == 0 ? 1 : vertexPrecision;
     int verticesPerLine = (mapSize - 1) / meshSimplificationIncrement + 1;
 
     for (var y = 0; y < mapSize + 1; y+= meshSimplificationIncrement)

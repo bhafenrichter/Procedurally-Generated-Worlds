@@ -15,8 +15,6 @@ public class PropService : MonoBehaviour {
   }
 
   internal void populateProps(dynamic offsetX, dynamic offsetY) {
-    Debug.Log("Generating " + propName);
-
     int chunkX = (int) offsetX;
     int chunkY = (int) offsetY;
 
@@ -41,7 +39,7 @@ public class PropService : MonoBehaviour {
     ClearTrees(trees);
 
     // generate points for trees
-    Vector3[] treePoints = generateTreePoints(precision, heightMultipler, meshVertices);
+    Vector3[] treePoints = generateTreePoints(chunkX, chunkY, precision, heightMultipler, meshVertices);
 
     for (var i = 0; i < treePoints.Length; i++) {
       int seed = UnityEngine.Random.Range(0, propPrefabs.Length);
@@ -49,15 +47,15 @@ public class PropService : MonoBehaviour {
       GameObject tree = GameObject.Instantiate(propPrefabs[seed], position, propPrefabs[seed].transform.rotation);
       tree.transform.parent = trees.transform;
     }
-    trees.transform.position = new Vector3(chunkX * (mapSize * 2), 0, chunkY * (mapSize * 2));
+    trees.transform.position = new Vector3(chunkX * (mapSize * precision), 0, chunkY * (mapSize * precision));
   }
 
-  internal Vector3[] generateTreePoints(int precision, float heightMultiplier, Vector3[] vertices) {
+  internal Vector3[] generateTreePoints(int chunkX, int chunkY, int precision, float heightMultiplier, Vector3[] vertices) {
     // use poisson disk sampling to generate clustered points
     // multiply by vertex percision
     int mapSize = ((int) Mathf.Sqrt(vertices.Length) - 1);
     // depending on the precision of the vertices, we'll need to adjust the mapsize to be 1:1 with the precision
-    List<Vector2> poissonPoints = PoissonDiscSampling.GeneratePoints(propRadius, new Vector2(mapSize / precision, mapSize / precision), 30);
+    List<Vector2> poissonPoints = PoissonDiscSampling.GeneratePoints(propRadius, new Vector2(mapSize, mapSize), 30);
     List<Vector3> trees = new List<Vector3>();
 
     for (var i = 0; i < poissonPoints.Count; i++) {
@@ -71,7 +69,8 @@ public class PropService : MonoBehaviour {
       float normalizedHeight = Mathf.Lerp(0f, 1f, height / heightMultiplier);
       
       if (normalizedHeight >= minPropHeightThreshold && normalizedHeight <= maxPropHeightThreshold) {
-        trees.Add(new Vector3(current.y * 2 * precision, height, current.x * 2 * precision));
+        // position must scale with the precision
+        trees.Add(new Vector3(current.y * precision, height, current.x * precision));
       }
       
     }

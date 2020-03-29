@@ -20,9 +20,6 @@ public class EventBus : MonoBehaviour
 
   void Awake()
   {
-    // events are tied to a hashset
-    Events = new Dictionary<string, List<Action<dynamic,dynamic>>>();
-
     if (Manager == null && Manager != this)
     {
       Destroy(gameObject);
@@ -30,24 +27,27 @@ public class EventBus : MonoBehaviour
 
     Manager = this;
 
-    // DontDestroyOnLoad(gameObject);
+    // events are tied to a hashset
+    Events = new Dictionary<string, List<Action<dynamic,dynamic>>>();
+
+    Events.Add(Actions.GENERATE_WORLD.ToString(), new List<Action<dynamic,dynamic>>());
+    Events.Add(Actions.GENERATE_WORLD_COMPLETE.ToString(), new List<Action<dynamic,dynamic>>());
+    Events.Add(Actions.GENERATE_CHUNK.ToString(), new List<Action<dynamic,dynamic>>());
+
+
+
+    DontDestroyOnLoad(gameObject);
   }
 
   public void Subscribe(Actions subscribeAction, Action<dynamic,dynamic> Subscriber)
   {    
     string eventName = subscribeAction.ToString();
-    List<Action<dynamic,dynamic>> currentActions = new List<Action<dynamic,dynamic>>();
 
-    if (Events.ContainsKey(eventName)) {
-      // get the events and add it to the end
-      currentActions = Events[eventName];
-      Events.Remove(eventName);
-    }
-    
+    var currentActions = Events[eventName];
     currentActions.Add(Subscriber);
 
     // update the events
-    Events.Add(eventName, currentActions);
+    // Events.ContainsKey("rte");
   }
 
   public void Unsubscribe(Action Subscriber)
