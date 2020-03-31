@@ -4,6 +4,7 @@ using UnityEngine;
 public class NoiseMapService {
   PerlinNoiseMap PerlinNoise;
   SimplexNoiseMap SimplexNoise;
+  RiverEngine RiverEngine;
   
   NoiseMapRenderer NoiseRenderer;
   public NoiseMapService(int seed, int width, int height, float scale, float persistance, float lacunarity, int octaves) {
@@ -12,23 +13,34 @@ public class NoiseMapService {
     PerlinNoise = new PerlinNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
     SimplexNoise = new SimplexNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
 
+    // intialize other services
+    RiverEngine = new RiverEngine();
+
     // initialize renderer
     NoiseRenderer = new NoiseMapRenderer();
   }
 
   public float[,] getNoiseMap(string noiseType, int chunkX, int chunkY) {
+    float[,] noiseMap = new float[0, 0];
     switch (noiseType) {
       case "Perlin": {
-        return PerlinNoise.generateNoise(chunkX, chunkY);
+        noiseMap = PerlinNoise.generateNoise(chunkX, chunkY);
+        break;
       }
       case "Simplex": {
-        return SimplexNoise.generateNoise(chunkX, chunkY);
+        noiseMap = SimplexNoise.generateNoise(chunkX, chunkY);
+        break;
       }
       default: {
         // default to perlin
-        return PerlinNoise.generateNoise(chunkX, chunkY);
+        noiseMap = PerlinNoise.generateNoise(chunkX, chunkY);
+        break;
       }
     }
+
+    noiseMap = RiverEngine.generateRivers(noiseMap);
+
+    return noiseMap;
   }
 
   public Texture2D getNoiseTexture(TerrainType[] terrainConfig, AnimationCurve heightCurve, float[,] noiseMap) {

@@ -38,8 +38,11 @@ public class NoiseMapRenderer
             break;
           }
         }
+
+        // colorMap[colorIndex] = Color.Lerp(Color.white, Color.black, heightCurve.Evaluate(heightMap[zIndex, xIndex]));
       }
     }
+    
     return colorMap;
   }
 }
