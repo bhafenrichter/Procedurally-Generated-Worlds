@@ -10,6 +10,7 @@ public class RiverEngine
     public float PATH_PRECISION = 0.5f;
     public int RIVER_WIDTH = 10;
     public float RIVER_DEPTH = 0.05f;
+    public float MAX_RIVER_DISTANCE = 250f;
     public float[,] generateRivers(float[,] noiseMap) {
         List<Vector2> mountainPoints = new List<Vector2>();
         List<Vector2> lakePoints = new List<Vector2>();
@@ -52,7 +53,11 @@ public class RiverEngine
             // index as to how far we've traveled along the river
             float riverPathDistance = 0f;
             var distance = Vector2.Distance(connection[0], connection[1]);
-
+            
+            if (distance > MAX_RIVER_DISTANCE) {
+                continue;
+            }
+            
             // while we are still traversing along the route
             while(riverPathDistance < distance) {
 
@@ -75,7 +80,9 @@ public class RiverEngine
                 noiseMap[x, y] = newHeight;
 
                 // make sure we don't hit this point again to avoid 0 or 1 absolutes
-                previouslyVisited.Add((x) + "-" + (y), true);
+                if (previouslyVisited.ContainsKey((x) + "-" + (y)) == false) {
+                    previouslyVisited.Add((x) + "-" + (y), true);
+                }
                 
 
                 // traverse to the sides of the point and set the depth accordingly
