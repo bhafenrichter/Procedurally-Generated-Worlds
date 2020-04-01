@@ -17,15 +17,17 @@ public class RiverEngine
         Dictionary<Vector2, List<Vector2>> lakeClusters = new Dictionary<Vector2, List<Vector2>>();
         Dictionary<Vector2, List<Vector2>> mountainClusters = new Dictionary<Vector2, List<Vector2>>();
 
-        // identify lakes
+        // identify lakes via k means clustering for the lowest points
         lakePoints = getPointsAtThreshold(noiseMap, LAKE_THRESHOLD, "<");
         lakeClusters = KMeansClustering.cluster(50, null, lakePoints, noiseMap.GetLength(0), 0);
 
-        // identify mountains
+        // identify mountains via k means clustering for the highest points
         mountainPoints = getPointsAtThreshold(noiseMap, MOUNTAIN_THRESHOLD, ">");
         mountainClusters = KMeansClustering.cluster(50, null, mountainPoints, noiseMap.GetLength(0), 0);
 
         // find the shortest distance between each node
+        // add a connection and generate the river based
+        // on that connection
         List<Vector2[]> connections = new List<Vector2[]>();
         for (var i = 0; i < mountainClusters.Count; i++) {
             Vector2 currentMountain = mountainClusters.Keys.ElementAt(i);
@@ -47,11 +49,14 @@ public class RiverEngine
         // get the path of the river
         Dictionary<string, bool?> previouslyVisited = new Dictionary<string, bool?>(); 
         foreach(var connection in connections) {
+            // index as to how far we've traveled along the river
             float riverPathDistance = 0f;
             var distance = Vector2.Distance(connection[0], connection[1]);
-            var difference = connection[0] - connection[1];
-            var trajectory = difference.x < 0 && difference.y < 0;
+
+            // while we are still traversing along the route
             while(riverPathDistance < distance) {
+
+                // get the current position based on how far we've traveled
                 var midpoint = KMeansClustering.LerpByDistance(connection[0], connection[1], riverPathDistance);
                 var x = (int) midpoint.x;
                 var y = (int) midpoint.y;
@@ -65,30 +70,34 @@ public class RiverEngine
                     continue;
                 }
 
+                // carve the depth into the river
                 var newHeight = noiseMap[x, y] - RIVER_DEPTH;
-                try {
-                    previouslyVisited.Add((x) + "-" + (y), true);
-                    Debug.Log((x) + "-" + (y));
-                } catch (Exception e) {}
-                
                 noiseMap[x, y] = newHeight;
 
+                // make sure we don't hit this point again to avoid 0 or 1 absolutes
+                previouslyVisited.Add((x) + "-" + (y), true);
+                
+
+                // traverse to the sides of the point and set the depth accordingly
+                // slowly progressing higher and higher to make it bowl
                 for (var i = 0; i < RIVER_WIDTH; i++) {
                     for (var j = 0; j < RIVER_WIDTH; j++) {
-                        try {
-                            // only visit each point one time, with precision, its possible to visit points twice
-                            if(previouslyVisited.ContainsKey((x + i) + "-" + (y + j))) {
-                                continue;
-                            } else {
-                                previouslyVisited.Add((x + i) + "-" + (y + j), true);
-                            }
-                            previousHeight = noiseMap[x + i, y + j];
-                            var sideNewHeight = Mathf.Lerp(previousHeight - RIVER_DEPTH, previousHeight, i / RIVER_WIDTH);
-                            noiseMap[x + i, y + j] = sideNewHeight;
-                        } catch (Exception e) {}
+
+                        // only visit each point one time, with precision, its possible to visit points twice
+                        if(previouslyVisited.ContainsKey((x + i) + "-" + (y + j))) {
+                            continue;
+                        } else {
+                            previouslyVisited.Add((x + i) + "-" + (y + j), true);
+                        }
+
+                        // get the previous height and lerp it based on how far from the center we are
+                        previousHeight = noiseMap[x + i, y + j];
+                        var sideNewHeight = Mathf.Lerp(previousHeight - RIVER_DEPTH, previousHeight, i / RIVER_WIDTH);
+                        noiseMap[x + i, y + j] = sideNewHeight;
                     }
                 }
 
+                // update the index so we keep moving along the path
                 riverPathDistance += PATH_PRECISION;
             }
             // get ready for next connection
