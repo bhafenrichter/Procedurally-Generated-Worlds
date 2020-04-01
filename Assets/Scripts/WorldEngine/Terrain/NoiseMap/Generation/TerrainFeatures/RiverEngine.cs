@@ -7,9 +7,12 @@ public class RiverEngine
     public float LAKE_THRESHOLD = 0.1f;
     public float MOUNTAIN_THRESHOLD = 0.9f;
     public float MAX_RIVER_HEIGHT = 0.8f;
+    public float MIN_RIVER_HEIGHT = 0.2f;
     public float PATH_PRECISION = 0.5f;
-    public int RIVER_WIDTH = 10;
-    public float RIVER_DEPTH = 0.05f;
+    public int MIN_RIVER_WIDTH = 5;
+    public int MAX_RIVER_WIDTH = 15;
+    public float MIN_RIVER_DEPTH = 0.05f;
+    public float MAX_RIVER_DEPTH = 0.1f;
     public float MAX_RIVER_DISTANCE = 250f;
     public float[,] generateRivers(float[,] noiseMap) {
         List<Vector2> mountainPoints = new List<Vector2>();
@@ -49,20 +52,26 @@ public class RiverEngine
 
         // get the path of the river
         Dictionary<string, bool?> previouslyVisited = new Dictionary<string, bool?>(); 
+
         foreach(var connection in connections) {
-            // index as to how far we've traveled along the river
-            float riverPathDistance = 0f;
+
+            var riverWidth = UnityEngine.Random.Range(MIN_RIVER_WIDTH, MAX_RIVER_WIDTH);
+            var riverDepth = UnityEngine.Random.Range(MIN_RIVER_DEPTH, MAX_RIVER_DEPTH);
+
             var distance = Vector2.Distance(connection[0], connection[1]);
             
             if (distance > MAX_RIVER_DISTANCE) {
                 continue;
             }
+
+            // generate the route
+            var path = generateRiverPath(noiseMap, connection[0], connection[1]);
             
             // while we are still traversing along the route
-            while(riverPathDistance < distance) {
+            for (var k = 0; k < path.Count; k++) {
 
                 // get the current position based on how far we've traveled
-                var midpoint = KMeansClustering.LerpByDistance(connection[0], connection[1], riverPathDistance);
+                var midpoint = path[k];
                 var x = (int) midpoint.x;
                 var y = (int) midpoint.y;
 
@@ -71,12 +80,15 @@ public class RiverEngine
 
                 // above a certain height, we don't want rivers generating
                 if (previousHeight > MAX_RIVER_HEIGHT) {
-                    riverPathDistance += PATH_PRECISION;
                     continue;
                 }
 
+                if (previousHeight + riverDepth < MIN_RIVER_HEIGHT) {
+                    break;
+                }
+
                 // carve the depth into the river
-                var newHeight = noiseMap[x, y] - RIVER_DEPTH;
+                var newHeight = noiseMap[x, y] - riverDepth;
                 noiseMap[x, y] = newHeight;
 
                 // make sure we don't hit this point again to avoid 0 or 1 absolutes
@@ -87,8 +99,8 @@ public class RiverEngine
 
                 // traverse to the sides of the point and set the depth accordingly
                 // slowly progressing higher and higher to make it bowl
-                for (var i = 0; i < RIVER_WIDTH; i++) {
-                    for (var j = 0; j < RIVER_WIDTH; j++) {
+                for (var i = 0; i < riverWidth; i++) {
+                    for (var j = 0; j < riverWidth; j++) {
 
                         // only visit each point one time, with precision, its possible to visit points twice
                         if(previouslyVisited.ContainsKey((x + i) + "-" + (y + j))) {
@@ -99,18 +111,72 @@ public class RiverEngine
 
                         // get the previous height and lerp it based on how far from the center we are
                         previousHeight = noiseMap[x + i, y + j];
-                        var sideNewHeight = Mathf.Lerp(previousHeight - RIVER_DEPTH, previousHeight, i / RIVER_WIDTH);
+                        var sideNewHeight = Mathf.Lerp(previousHeight - riverDepth, previousHeight, i / riverWidth);
                         noiseMap[x + i, y + j] = sideNewHeight;
                     }
                 }
-
-                // update the index so we keep moving along the path
-                riverPathDistance += PATH_PRECISION;
             }
             // get ready for next connection
             previouslyVisited.Clear();
         }
         return noiseMap;
+    }
+
+    public List<Vector2> generateRiverPath(float[,] noiseMap, Vector2 origin, Vector2 destination) {
+        List<Vector2> path = new List<Vector2>();
+        var currentPoint = origin;
+        var initialDistance = Vector2.Distance(origin, destination);
+
+        while(initialDistance > 10) {
+            if (path.Count > 1000) {
+                break;
+            }
+            var up = new Vector2(currentPoint.x, currentPoint.y + 1);
+            var down = new Vector2(currentPoint.x, currentPoint.y - 1);
+            var left = new Vector2(currentPoint.x - 1, currentPoint.y);
+            var right = new Vector2(currentPoint.x + 1, currentPoint.y);
+
+            var upDistance = Vector2.Distance(up, destination);
+            var downDistance = Vector2.Distance(down, destination);
+            var leftDistance = Vector2.Distance(left, destination);
+            var rightDistance = Vector2.Distance(right, destination);
+
+            var upElevation = noiseMap[(int) up.x, (int) up.y];
+            var downElevation = noiseMap[(int) down.x, (int) down.y];
+            var leftElevation = noiseMap[(int) left.x, (int) left.y];
+            var rightElevation = noiseMap[(int) right.x, (int) right.y];
+
+            var estimatedProgress = 0;
+
+            var upScore = evaluateRiverPoint(initialDistance, upDistance, upElevation, estimatedProgress);
+            var downScore = evaluateRiverPoint(initialDistance, downDistance, downElevation, estimatedProgress);
+            var leftScore = evaluateRiverPoint(initialDistance, leftDistance, leftElevation, estimatedProgress);
+            var rightScore = evaluateRiverPoint(initialDistance, rightDistance, rightElevation, estimatedProgress);
+
+            var bestScore = Mathf.Max(upScore, downScore, leftScore, rightScore);
+            
+            if (upScore == bestScore) { path.Add(up); }
+            if (downScore == bestScore) { path.Add(down); }
+            if (leftScore == bestScore) { path.Add(left); }
+            if (rightScore == bestScore) { path.Add(right); }
+            
+            currentPoint = path.Last();
+            initialDistance = Vector2.Distance(currentPoint, destination);
+        }
+
+        return path;
+    }
+
+    public float evaluateRiverPoint (float initialDistance, float distance, float height, float progress) {
+        float distanceHeuristic = 0.5f;
+        float heightHeuristic = 0.5f;
+
+        // rule out going away from water source
+        if (initialDistance < distance) {
+            return 0;
+        }
+
+        return 1 - height;
     }
 
     List<Vector2> getPointsAtThreshold (float[,] noiseMap, float threshold, string comparision) {
