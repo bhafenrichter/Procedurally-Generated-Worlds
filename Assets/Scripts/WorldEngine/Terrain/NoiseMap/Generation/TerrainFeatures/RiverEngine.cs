@@ -6,9 +6,14 @@ public class RiverEngine
 {
     public float LAKE_THRESHOLD = 0.1f;
     public float MOUNTAIN_THRESHOLD = 0.9f;
+    public float MAX_RIVER_HEIGHT = 0.8f;
+    public float PATH_PRECISION = 0.5f;
+    public int RIVER_WIDTH = 10;
+    public float RIVER_DEPTH = 0.05f;
     public float[,] generateRivers(float[,] noiseMap) {
         List<Vector2> mountainPoints = new List<Vector2>();
         List<Vector2> lakePoints = new List<Vector2>();
+
         Dictionary<Vector2, List<Vector2>> lakeClusters = new Dictionary<Vector2, List<Vector2>>();
         Dictionary<Vector2, List<Vector2>> mountainClusters = new Dictionary<Vector2, List<Vector2>>();
 
@@ -40,9 +45,6 @@ public class RiverEngine
         }
 
         // get the path of the river
-        float precision = 0.1f;
-        float riverWidth = 5f;
-        float riverDepth = 0.05f;
         Dictionary<string, bool?> previouslyVisited = new Dictionary<string, bool?>(); 
         foreach(var connection in connections) {
             float riverPathDistance = 0f;
@@ -54,78 +56,44 @@ public class RiverEngine
                 var x = (int) midpoint.x;
                 var y = (int) midpoint.y;
 
-                // only visit each point one time, with precision, its possible to visit points twice
-                if(previouslyVisited.ContainsKey(x + "-" + y)) {
-                    riverPathDistance += precision;
-                    continue;
-                } else {
-                    previouslyVisited.Add(x + "-" + y, true);
-                }
-
                 // do it over the course of the width of the river
                 var previousHeight = noiseMap[x, y];
-                var newHeight = noiseMap[x, y] - riverDepth;
+
+                // above a certain height, we don't want rivers generating
+                if (previousHeight > MAX_RIVER_HEIGHT) {
+                    riverPathDistance += PATH_PRECISION;
+                    continue;
+                }
+
+                var newHeight = noiseMap[x, y] - RIVER_DEPTH;
+                try {
+                    previouslyVisited.Add((x) + "-" + (y), true);
+                    Debug.Log((x) + "-" + (y));
+                } catch (Exception e) {}
+                
                 noiseMap[x, y] = newHeight;
 
-                if (trajectory == false) {
-                    for (var i = 0; i < riverWidth; i++) {
-                        for (var j = 0; j < riverWidth; j++) {
-                            try {
-                                previousHeight = noiseMap[x + i, y + j];
-                                var sideNewHeight = Mathf.Lerp(newHeight, previousHeight, i / riverWidth);
-                                noiseMap[x + i, y + j] = sideNewHeight;
-                                previouslyVisited.Add((x+i) + "-" + (y+j), true);
-                            } catch (Exception e) {}
-                        }
-                    }
-                } else {
-                    for (var i = (int) riverWidth; i > 0; i--) {
-                        for (var j = (int) riverWidth; j > 0; j--) {
-                            try {
-                                previousHeight = noiseMap[x - i, y - j];
-                                var sideNewHeight = Mathf.Lerp(newHeight, previousHeight, i / riverWidth);
-                                noiseMap[x - i, y - j] = sideNewHeight;
-                                previouslyVisited.Add((x-i) + "-" + (y-j), true);
-                            } catch (Exception e) {}
-                        }
+                for (var i = 0; i < RIVER_WIDTH; i++) {
+                    for (var j = 0; j < RIVER_WIDTH; j++) {
+                        try {
+                            // only visit each point one time, with precision, its possible to visit points twice
+                            if(previouslyVisited.ContainsKey((x + i) + "-" + (y + j))) {
+                                continue;
+                            } else {
+                                previouslyVisited.Add((x + i) + "-" + (y + j), true);
+                            }
+                            previousHeight = noiseMap[x + i, y + j];
+                            var sideNewHeight = Mathf.Lerp(previousHeight - RIVER_DEPTH, previousHeight, i / RIVER_WIDTH);
+                            noiseMap[x + i, y + j] = sideNewHeight;
+                        } catch (Exception e) {}
                     }
                 }
-                riverPathDistance += precision;
+
+                riverPathDistance += PATH_PRECISION;
             }
             // get ready for next connection
             previouslyVisited.Clear();
         }
-
-        // modify the vertices at that path to simulate river
-
-        // generate mesh that will act as the river
-
-        // foreach(var item in lakeClusters) {
-        //     Vector2 current = item.Key;
-        //     noiseMap[(int) current.x, (int) current.y] = 1;
-        //     noiseMap[(int) current.x, (int) current.y] = 1;
-        //     noiseMap[(int) current.x + 1, (int) current.y] = 1;
-        //     noiseMap[(int) current.x, (int) current.y + 1] = 1;
-        //     noiseMap[(int) current.x + 1, (int) current.y + 1] = 1;
-        // }
-
-        //   foreach(var item in mountainClusters) {
-        //     Vector2 current = item.Key;
-        //     noiseMap[(int) current.x, (int) current.y] = 0;
-        //     noiseMap[(int) current.x + 1, (int) current.y] = 0;
-        //     noiseMap[(int) current.x, (int) current.y + 1] = 0;
-        //     noiseMap[(int) current.x + 1, (int) current.y + 1] = 0;
-        // }
-
-        // for (var i = 0; i < mountainPoints.Count; i++) {
-        //     Vector2 current = mountainPoints[i];
-        //     noiseMap[(int) current.x, (int) current.y] = 1;
-        // }
-
-        // for (var i = 0; i < lakePoints.Count; i++) {
-        //     Vector2 current = lakePoints[i];
-        //     noiseMap[(int) current.x, (int) current.y] = -1;
-        // }
         return noiseMap;
     }
 

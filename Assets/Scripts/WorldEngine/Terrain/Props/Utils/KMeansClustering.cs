@@ -5,6 +5,7 @@ using System;
 
 public static class KMeansClustering {
   
+    public static float MIN_NONDUPLICATE_DISTANCE = 20f;
   public static Dictionary<Vector2, List<Vector2>> cluster(int k, Dictionary<Vector2, List<Vector2>> clusterPoints, List<Vector2> points, int mapSize, int attempts) {
     bool hasShifted = false;
     
@@ -69,8 +70,27 @@ public static class KMeansClustering {
     if (hasShifted && attempts < 100) {
       return cluster(k, newClusters, points, mapSize, attempts);
     } else {
+      newClusters = removeDuplicateClusters(newClusters);
       return newClusters;
     }
+  }
+  public static Dictionary<Vector2, List<Vector2>> removeDuplicateClusters(Dictionary<Vector2, List<Vector2>> unSanitizedClusters) {
+    Dictionary<Vector2, List<Vector2>> sanitizedClusters = new Dictionary<Vector2, List<Vector2>>();
+
+    foreach(var clusterToAdd in unSanitizedClusters) {
+      bool isDuplicate = false;
+      foreach(var clusterToTest in sanitizedClusters) {
+        if (Vector2.Distance(clusterToTest.Key, clusterToAdd.Key) < MIN_NONDUPLICATE_DISTANCE) {
+          isDuplicate = true;
+        }
+      }
+
+      if (isDuplicate == false) {
+        sanitizedClusters.Add(clusterToAdd.Key, clusterToAdd.Value);
+      }
+    }
+
+    return sanitizedClusters;
   }
 
   public static Vector3 LerpByDistance(Vector3 A, Vector3 B, float x)
