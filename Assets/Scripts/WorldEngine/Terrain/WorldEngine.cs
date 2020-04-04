@@ -4,15 +4,12 @@ using System.Collections;
 public class WorldEngine : MonoBehaviour
 {
   // configuration setttings for map generation
-  public AnimationCurve heightCurve;
-  public float heightMultipler;
   public int seed;
   public int mapSize;
   public float scale = 5f;
   public float lacunarity = 1f;
   public float persistance = 1f;
   public int octaves = 1;
-  public int vertexPrecision;
   public string noiseType;
   public TerrainType[] terrainConfigs;
   public GameObject Chunks;
@@ -20,12 +17,15 @@ public class WorldEngine : MonoBehaviour
   private NoiseMapService NoiseMapService;
   private MeshService MeshService;
   private Mesh debugMesh;
+  private RiverEngine RiverEngine;
   
   void Start()
   {
     // initialize services
-    MeshService = new MeshService();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+
+    // initialize other services
+    RiverEngine = GetComponent<RiverEngine>();
 
     // subscribe to the generate world event
     EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD, generateWorld);
@@ -35,22 +35,25 @@ public class WorldEngine : MonoBehaviour
 
   public void generateWorld(dynamic parameters, dynamic dummy) {
     // debugging instances only
-    MeshService = new MeshService();
+    MeshService = GetComponent<MeshService>();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+    RiverEngine = GetComponent<RiverEngine>();
     // debugging instances only
 
     ClearChunks();
 
     generateChunk(0, 0);
-    generateChunk(1, 0);
-    generateChunk(0, 1);
-    generateChunk(1, 1);
+    RiverEngine.generateRiverMeshes(0, 0);
+    // generateChunk(1, 0);
+    // generateChunk(0, 1);
+    // generateChunk(1, 1);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
     // debugging instances only
-    MeshService = new MeshService();
+    MeshService = GetComponent<MeshService>();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+    RiverEngine = GetComponent<RiverEngine>();
     // debugging instances only
 
     GameObject chunk = loadChunk(chunkX, chunkY);
@@ -61,9 +64,10 @@ public class WorldEngine : MonoBehaviour
 
     // Noise Map Provider for all types of Noises
     float[,] noiseMap = NoiseMapService.getNoiseMap(noiseType, chunkX, chunkY);
+    noiseMap = RiverEngine.generateRivers(noiseMap);
 
     // generate the new mesh
-    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap, heightMultipler, heightCurve, vertexPrecision);
+    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap);
 
     // destroy the previous mesh collider 
     DestroyImmediate(chunk.GetComponent<MeshCollider>());
@@ -72,12 +76,11 @@ public class WorldEngine : MonoBehaviour
     chunk.AddComponent<MeshCollider>();
 
     // render mesh texture
-    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, heightCurve, noiseMap);
+    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, MeshService.heightCurve, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
 
-
     // notify other modules in the generator that the terrain is complete
-    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);
+    // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);
 
     return mesh;
   }
@@ -119,12 +122,12 @@ public class WorldEngine : MonoBehaviour
     Chunks = freshChunk;
   }
 
-  private void OnDrawGizmos() {
-      if (debugMesh != null && debugMesh.vertices != null) {
-          Gizmos.color = Color.red;
-          for (var i = 0; i < debugMesh.vertices.Length; i++) {
-              Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
-          }
-      }
-  }
+  // private void OnDrawGizmos() {
+  //     if (debugMesh != null && debugMesh.vertices != null) {
+  //         Gizmos.color = Color.red;
+  //         for (var i = 0; i < debugMesh.vertices.Length; i++) {
+  //             Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
+  //         }
+  //     }
+  // }
 }

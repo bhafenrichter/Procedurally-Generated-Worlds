@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using System;
-public class RiverEngine
+using System.Collections;
+public class RiverEngine : MonoBehaviour
 {
     public float LAKE_THRESHOLD = 0.1f;
     public float MOUNTAIN_THRESHOLD = 0.9f;
@@ -14,7 +14,24 @@ public class RiverEngine
     public float MIN_RIVER_DEPTH = 0.05f;
     public float MAX_RIVER_DEPTH = 0.1f;
     public float MAX_RIVER_DISTANCE = 250f;
+    private List<List<Vector3>> riverPaths;
+    public Texture riverTexture;
+    public Shader riverShader;
+    public Material riverMaterial;
+    public enum DIRECTIONS {
+        DOWN= 0,
+        UP= 1,
+        LEFT= 2,
+        RIGHT= 3
+    };
+    private void Start() {
+        // EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD_COMPLETE, generateRiverMeshes);
+    }
+
     public float[,] generateRivers(float[,] noiseMap) {
+        // save these for later when you're generating the mesh
+        riverPaths = new List<List<Vector3>>();
+
         List<Vector2> mountainPoints = new List<Vector2>();
         List<Vector2> lakePoints = new List<Vector2>();
 
@@ -54,7 +71,7 @@ public class RiverEngine
         Dictionary<string, bool?> previouslyVisited = new Dictionary<string, bool?>(); 
 
         foreach(var connection in connections) {
-
+            
             var riverWidth = UnityEngine.Random.Range(MIN_RIVER_WIDTH, MAX_RIVER_WIDTH);
             var riverDepth = UnityEngine.Random.Range(MIN_RIVER_DEPTH, MAX_RIVER_DEPTH);
 
@@ -65,13 +82,17 @@ public class RiverEngine
             }
 
             // generate the route
-            var path = generateRiverPath(noiseMap, connection[0], connection[1]);
-            
+            var directions = new List<DIRECTIONS>();
+            var path = generateRiverPath(noiseMap, connection[0], connection[1], ref directions);
+            // outlines the river so we can generate the mesh later
+            var riverOutline = new List<Vector3>();
             // while we are still traversing along the route
             for (var k = 0; k < path.Count; k++) {
 
                 // get the current position based on how far we've traveled
                 var midpoint = path[k];
+                var direction = directions[k];
+
                 var x = (int) midpoint.x;
                 var y = (int) midpoint.y;
 
@@ -97,6 +118,15 @@ public class RiverEngine
                 }
                 
 
+
+                // add the beginning and end points to the mesh data
+                var outlinePoint = getRiverOutlinePoint(x, y, riverWidth, direction, true);
+                riverOutline.Add(new Vector3(outlinePoint.x, newHeight, outlinePoint.y));
+                
+                outlinePoint = getRiverOutlinePoint(x, y, riverWidth, direction, false);
+                riverOutline.Add(new Vector3(outlinePoint.x, newHeight, outlinePoint.y));
+
+                var sideNewHeight = 0f;
                 // traverse to the sides of the point and set the depth accordingly
                 // slowly progressing higher and higher to make it bowl
                 for (var i = 0; i < riverWidth; i++) {
@@ -111,18 +141,43 @@ public class RiverEngine
 
                         // get the previous height and lerp it based on how far from the center we are
                         previousHeight = noiseMap[x + i, y + j];
-                        var sideNewHeight = Mathf.Lerp(previousHeight - riverDepth, previousHeight, i / riverWidth);
+                        sideNewHeight = Mathf.Lerp(previousHeight - riverDepth, previousHeight, i / riverWidth);
                         noiseMap[x + i, y + j] = sideNewHeight;
                     }
                 }
             }
             // get ready for next connection
             previouslyVisited.Clear();
+
+            // add the mesh data
+            riverPaths.Add(riverOutline);
         }
         return noiseMap;
     }
 
-    public List<Vector2> generateRiverPath(float[,] noiseMap, Vector2 origin, Vector2 destination) {
+    public Vector2 getRiverOutlinePoint (int x, int y, int riverWidth, DIRECTIONS direction, bool isOrigin) {
+        Vector2 point = new Vector2();
+        switch (direction) {
+            case DIRECTIONS.UP:
+                point = isOrigin ? new Vector2(x + riverWidth, y - 1) : new Vector2(x - 1, y + riverWidth);
+                break;
+            case DIRECTIONS.DOWN:
+                // not so sure about this one
+                point = isOrigin ?  new Vector2(x - riverWidth, y - 1) : new Vector2(x, y - riverWidth);
+                break;
+            case DIRECTIONS.LEFT:
+                point = isOrigin ?  new Vector2(x - 1, y - 1) : new Vector2(x, y - riverWidth);
+                break;
+            case DIRECTIONS.RIGHT:
+                point = isOrigin ?  new Vector2(x + riverWidth, y - 1) : new Vector2(x - 1, y + riverWidth);
+                break;
+            default: 
+                return Vector2.zero;
+        }
+        return point;
+    }
+
+    public List<Vector2> generateRiverPath(float[,] noiseMap, Vector2 origin, Vector2 destination, ref List<DIRECTIONS> directions) {
         List<Vector2> path = new List<Vector2>();
         var currentPoint = origin;
         var initialDistance = Vector2.Distance(origin, destination);
@@ -141,10 +196,10 @@ public class RiverEngine
             var leftDistance = Vector2.Distance(left, destination);
             var rightDistance = Vector2.Distance(right, destination);
 
-            var upElevation = noiseMap[(int) up.x, (int) up.y];
-            var downElevation = noiseMap[(int) down.x, (int) down.y];
-            var leftElevation = noiseMap[(int) left.x, (int) left.y];
-            var rightElevation = noiseMap[(int) right.x, (int) right.y];
+            var upElevation = up.x > 0 ? noiseMap[(int) up.x, (int) up.y] : 1f;
+            var downElevation = down.x > 0 ? noiseMap[(int) down.x, (int) down.y] : 1f;
+            var leftElevation = left.x > 0 ? noiseMap[(int) left.x, (int) left.y] : 1f;
+            var rightElevation = right.x > 0 ? noiseMap[(int) right.x, (int) right.y] : 1f;
 
             var estimatedProgress = 0;
 
@@ -155,10 +210,10 @@ public class RiverEngine
 
             var bestScore = Mathf.Max(upScore, downScore, leftScore, rightScore);
             
-            if (upScore == bestScore) { path.Add(up); }
-            if (downScore == bestScore) { path.Add(down); }
-            if (leftScore == bestScore) { path.Add(left); }
-            if (rightScore == bestScore) { path.Add(right); }
+            if (upScore == bestScore) { path.Add(up); directions.Add(DIRECTIONS.UP); }
+            if (downScore == bestScore) { path.Add(down); directions.Add(DIRECTIONS.DOWN); }
+            if (leftScore == bestScore) { path.Add(left); directions.Add(DIRECTIONS.LEFT); }
+            if (rightScore == bestScore) { path.Add(right); directions.Add(DIRECTIONS.RIGHT); }
             
             currentPoint = path.Last();
             initialDistance = Vector2.Distance(currentPoint, destination);
@@ -194,5 +249,31 @@ public class RiverEngine
         }
 
         return points;
+    }
+
+    public void generateRiverMeshes (dynamic chunkX, dynamic chunkY) {
+        GameObject chunk = GameObject.Find(Utils.getChunkName(chunkX, chunkY));
+        MeshService meshService = GetComponent<MeshService>();
+
+        foreach(var river in riverPaths) {
+            GameObject test = new GameObject();
+            MeshFilter meshFilter = test.AddComponent(typeof(MeshFilter)) as MeshFilter;
+            MeshRenderer renderer = test.AddComponent(typeof(MeshRenderer)) as MeshRenderer;
+
+            test.name = "River";
+            StartCoroutine(meshService.generateMeshFromPoints(chunk.GetComponent<MeshFilter>().mesh, river));
+            // var mesh = meshService.generateMeshFromPoints(chunk.GetComponent<MeshFilter>().mesh, river);
+            // meshFilter.mesh = mesh;
+
+            // renderer.material = riverMaterial;
+            // renderer.material.mainTexture = riverTexture;
+            // renderer.material.shader = riverShader;
+
+            // meshFilter.transform.parent = test.transform;
+            // renderer.transform.parent = test.transform;
+            // test.transform.parent = chunk.transform.parent;
+
+            // Instantiate(test, Vector3.zero, gameObject.transform.rotation);
+        }
     }
 }

@@ -18,8 +18,8 @@ public class PropService : MonoBehaviour {
     int chunkX = (int) offsetX;
     int chunkY = (int) offsetY;
 
-    int precision = gameObject.transform.parent.GetComponent<WorldEngine>().vertexPrecision;
-    float heightMultipler = gameObject.transform.parent.GetComponent<WorldEngine>().heightMultipler;
+    int precision = gameObject.transform.parent.GetComponent<MeshService>().vertexPrecision;
+    float heightMultipler = gameObject.transform.parent.GetComponent<MeshService>().heightMultipler;
 
     // dynamic casting
     GameObject chunk = GameObject.Find(Utils.getChunkName(offsetX, offsetY));

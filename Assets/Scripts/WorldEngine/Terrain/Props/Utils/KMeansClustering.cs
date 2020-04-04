@@ -5,7 +5,7 @@ using System;
 
 public static class KMeansClustering {
   
-    public static float MIN_NONDUPLICATE_DISTANCE = 20f;
+    public static float MIN_NONDUPLICATE_DISTANCE = 50f;
   public static Dictionary<Vector2, List<Vector2>> cluster(int k, Dictionary<Vector2, List<Vector2>> clusterPoints, List<Vector2> points, int mapSize, int attempts) {
     bool hasShifted = false;
     

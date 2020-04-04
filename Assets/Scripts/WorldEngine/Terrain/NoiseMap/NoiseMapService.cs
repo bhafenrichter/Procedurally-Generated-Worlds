@@ -13,9 +13,6 @@ public class NoiseMapService {
     PerlinNoise = new PerlinNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
     SimplexNoise = new SimplexNoiseMap(seed, width, height, scale, lacunarity, persistance, octaves);
 
-    // intialize other services
-    RiverEngine = new RiverEngine();
-
     // initialize renderer
     NoiseRenderer = new NoiseMapRenderer();
   }
@@ -37,8 +34,6 @@ public class NoiseMapService {
         break;
       }
     }
-
-    noiseMap = RiverEngine.generateRivers(noiseMap);
 
     return noiseMap;
   }
