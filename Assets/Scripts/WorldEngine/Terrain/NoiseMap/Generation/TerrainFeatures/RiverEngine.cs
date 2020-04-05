@@ -19,6 +19,7 @@ public class RiverEngine : MonoBehaviour
     public Shader riverShader;
     public Material riverMaterial;
     public enum DIRECTIONS {
+        EMPTY=-1,
         DOWN= 0,
         UP= 1,
         LEFT= 2,
@@ -86,6 +87,7 @@ public class RiverEngine : MonoBehaviour
             var path = generateRiverPath(noiseMap, connection[0], connection[1], ref directions);
             // outlines the river so we can generate the mesh later
             var riverOutline = new List<Vector3>();
+            var prevDirection = DIRECTIONS.EMPTY;
             // while we are still traversing along the route
             for (var k = 0; k < path.Count; k++) {
 
@@ -108,22 +110,22 @@ public class RiverEngine : MonoBehaviour
                     break;
                 }
 
-                // carve the depth into the river
-                var newHeight = noiseMap[x, y] - riverDepth;
-                noiseMap[x, y] = newHeight;
-
                 // make sure we don't hit this point again to avoid 0 or 1 absolutes
                 if (previouslyVisited.ContainsKey((x) + "-" + (y)) == false) {
                     previouslyVisited.Add((x) + "-" + (y), true);
                 }
-                
 
+                // carve the depth into the river
+                var newHeight = Mathf.Lerp( noiseMap[x, y] - riverDepth, previousHeight, 1);
+                noiseMap[x, y] = newHeight;
 
                 // add the beginning and end points to the mesh data
-                var outlinePoint = getRiverOutlinePoint(x, y, riverWidth, direction, true);
+                var startingPoint = configureRiverStartingPoints(x, y, riverWidth, direction, true);
+                var outlinePoint = getRiverOutlinePoint(startingPoint.x, startingPoint.y, direction);
                 riverOutline.Add(new Vector3(outlinePoint.x, newHeight, outlinePoint.y));
                 
-                outlinePoint = getRiverOutlinePoint(x, y, riverWidth, direction, false);
+                startingPoint = configureRiverStartingPoints(x, y, riverWidth, direction, false);
+                outlinePoint = getRiverOutlinePoint(startingPoint.x, startingPoint.y, direction);
                 riverOutline.Add(new Vector3(outlinePoint.x, newHeight, outlinePoint.y));
 
                 var sideNewHeight = 0f;
@@ -145,6 +147,7 @@ public class RiverEngine : MonoBehaviour
                         noiseMap[x + i, y + j] = sideNewHeight;
                     }
                 }
+                prevDirection = direction;
             }
             // get ready for next connection
             previouslyVisited.Clear();
@@ -155,21 +158,34 @@ public class RiverEngine : MonoBehaviour
         return noiseMap;
     }
 
-    public Vector2 getRiverOutlinePoint (int x, int y, int riverWidth, DIRECTIONS direction, bool isOrigin) {
+    public Vector2 configureRiverStartingPoints (int x, int y, int riverWidth, DIRECTIONS direction, bool isOrigin) {
+        switch (direction) {
+            case DIRECTIONS.UP:
+                return isOrigin ? new Vector2(x + riverWidth, y - 1) : new Vector2(x, y + riverWidth + 1);
+            case DIRECTIONS.DOWN:
+                return isOrigin ? new Vector2(x, y) : new Vector2(x + riverWidth, y + riverWidth);
+            case DIRECTIONS.LEFT:
+                return isOrigin ? new Vector2(x, y) : new Vector2(x + riverWidth, y + riverWidth);
+            case DIRECTIONS.RIGHT:
+                return isOrigin ? new Vector2(x + riverWidth, y) : new Vector2(x, y + riverWidth);
+            default:
+                return Vector2.zero;
+        }
+    }
+    public Vector2 getRiverOutlinePoint (float x, float y, DIRECTIONS direction) {
         Vector2 point = new Vector2();
         switch (direction) {
             case DIRECTIONS.UP:
-                point = isOrigin ? new Vector2(x + riverWidth, y - 1) : new Vector2(x - 1, y + riverWidth);
+                point = new Vector2(x, y + 1);
                 break;
             case DIRECTIONS.DOWN:
-                // not so sure about this one
-                point = isOrigin ?  new Vector2(x - riverWidth, y - 1) : new Vector2(x, y - riverWidth);
+                point = new Vector2(x, y - 1);
                 break;
             case DIRECTIONS.LEFT:
-                point = isOrigin ?  new Vector2(x - 1, y - 1) : new Vector2(x, y - riverWidth);
+                point = new Vector2(x - 1, y);
                 break;
             case DIRECTIONS.RIGHT:
-                point = isOrigin ?  new Vector2(x + riverWidth, y - 1) : new Vector2(x - 1, y + riverWidth);
+                point = new Vector2(x + 1, y);
                 break;
             default: 
                 return Vector2.zero;

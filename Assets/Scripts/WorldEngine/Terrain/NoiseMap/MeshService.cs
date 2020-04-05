@@ -26,8 +26,8 @@ public class MeshService : MonoBehaviour {
       {
         float initialHeight = noiseMap[x,y];
         initialHeight = heightCurve.Evaluate(initialHeight) * heightMultipler;
-        // vertices.Add(new Vector3(x, 0, y));
         vertices.Add(new Vector3(x, initialHeight, y));
+        // vertices.Add(new Vector3(x, 0, y));
       }
     }
 
@@ -97,7 +97,8 @@ public class MeshService : MonoBehaviour {
 
     for (var i = 0; i < points.Count; i++) {
       var currentIndex = Utils.getIndexFrom2DArray(vertices.Length, (int) points[i].z, (int) points[i].x);
-      var currentPoint = vertices[currentIndex];
+
+      var currentPoint = currentIndex > 0 ? vertices[currentIndex] : points[i];
       
       points[i] = new Vector3(points[i].x, currentPoint.y, points[i].z);
       yield return new WaitForSeconds(0.01f);
