@@ -70,8 +70,8 @@ public static class KMeansClustering {
     if (hasShifted && attempts < 100) {
       return cluster(k, newClusters, points, mapSize, attempts);
     } else {
-      newClusters = removeDuplicateClusters(newClusters);
-      return newClusters;
+      // newClusters = removeDuplicateClusters(clusterPoints);
+      return clusterPoints;
     }
   }
   public static Dictionary<Vector2, List<Vector2>> removeDuplicateClusters(Dictionary<Vector2, List<Vector2>> unSanitizedClusters) {

@@ -87,45 +87,37 @@ public class MeshService : MonoBehaviour {
   }
 
 
-  public IEnumerator generateMeshFromPoints(Mesh chunk, List<Vector3> points) {
+  public Mesh generateMeshFromPoints(List<Vector3> points) {
     // Create the Vector3 vertices 
     Mesh msh = new Mesh();
-    Vector3[] vertices = chunk.vertices;
     List<int> triangles = new List<int>();
     Vector2[] uvs = new Vector2[points.Count];
     int pointsIndex = 0;
 
-    for (var i = 0; i < points.Count; i++) {
-      var currentIndex = Utils.getIndexFrom2DArray(vertices.Length, (int) points[i].z, (int) points[i].x);
-      var currentPoint = vertices[currentIndex];
-      
-      points[i] = new Vector3(points[i].x, currentPoint.y, points[i].z);
-      yield return new WaitForSeconds(0.01f);
-      debugMesh.Add(points[i]);
-    }
+    msh.vertices = points.ToArray();
     
-    // while(pointsIndex < points.Count - 4) {
-    //   triangles.Add(pointsIndex);
-    //   triangles.Add(pointsIndex + 2);
-    //   triangles.Add(pointsIndex + 1);
-    //   triangles.Add(pointsIndex + 2);
-    //   triangles.Add(pointsIndex + 3);
-    //   triangles.Add(pointsIndex + 1);
-    //   pointsIndex += 1;
-    // }
+    while(pointsIndex <= points.Count - 4) {
+      triangles.Add(pointsIndex);
+      triangles.Add(pointsIndex + 2);
+      triangles.Add(pointsIndex + 1);
+      triangles.Add(pointsIndex + 2);
+      triangles.Add(pointsIndex + 3);
+      triangles.Add(pointsIndex + 1);
+      pointsIndex += 1;
+    }
 
-    // for (int i = 0; i < uvs.Length; i++)
-    // {
-    //   uvs[i] = new Vector2((float) points[i].z, (float)  points[i].x);
-    // }
+    for (int i = 0; i < uvs.Length; i++)
+    {
+      uvs[i] = new Vector2((float) points[i].z, (float)  points[i].x);
+    }
 
 
-    // msh.vertices = points.ToArray();
-    // msh.triangles = triangles.ToArray();
+    msh.vertices = points.ToArray();
+    msh.triangles = triangles.ToArray();
 
-    // msh.RecalculateNormals();
-    // msh.RecalculateBounds();
-    // return msh;
+    msh.RecalculateNormals();
+    msh.RecalculateBounds();
+    return msh;
   }
 
       private void OnDrawGizmos() {
