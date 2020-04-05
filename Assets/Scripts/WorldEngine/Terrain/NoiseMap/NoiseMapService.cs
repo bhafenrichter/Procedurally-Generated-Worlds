@@ -4,7 +4,6 @@ using UnityEngine;
 public class NoiseMapService {
   PerlinNoiseMap PerlinNoise;
   SimplexNoiseMap SimplexNoise;
-  RiverEngine RiverEngine;
   
   NoiseMapRenderer NoiseRenderer;
   public NoiseMapService(int seed, int width, int height, float scale, float persistance, float lacunarity, int octaves) {

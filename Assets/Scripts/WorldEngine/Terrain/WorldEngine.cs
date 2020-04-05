@@ -17,7 +17,6 @@ public class WorldEngine : MonoBehaviour
   private NoiseMapService NoiseMapService;
   private MeshService MeshService;
   private Mesh debugMesh;
-  private RiverEngine RiverEngine;
   
   void Start()
   {
@@ -25,7 +24,6 @@ public class WorldEngine : MonoBehaviour
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
 
     // initialize other services
-    RiverEngine = GetComponent<RiverEngine>();
 
     // subscribe to the generate world event
     EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD, generateWorld);
@@ -37,13 +35,12 @@ public class WorldEngine : MonoBehaviour
     // debugging instances only
     MeshService = GetComponent<MeshService>();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
-    RiverEngine = GetComponent<RiverEngine>();
+
     // debugging instances only
 
     ClearChunks();
 
     generateChunk(0, 0);
-    RiverEngine.generateRiverMeshes(0, 0);
     // generateChunk(1, 0);
     // generateChunk(0, 1);
     // generateChunk(1, 1);
@@ -53,7 +50,6 @@ public class WorldEngine : MonoBehaviour
     // debugging instances only
     MeshService = GetComponent<MeshService>();
     NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
-    RiverEngine = GetComponent<RiverEngine>();
     // debugging instances only
 
     GameObject chunk = loadChunk(chunkX, chunkY);
@@ -64,7 +60,6 @@ public class WorldEngine : MonoBehaviour
 
     // Noise Map Provider for all types of Noises
     float[,] noiseMap = NoiseMapService.getNoiseMap(noiseType, chunkX, chunkY);
-    noiseMap = RiverEngine.generateRivers(noiseMap);
 
     // generate the new mesh
     meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap);
