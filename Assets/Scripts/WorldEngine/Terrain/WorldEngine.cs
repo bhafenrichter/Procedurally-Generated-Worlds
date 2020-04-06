@@ -1,17 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class WorldEngine : MonoBehaviour
 {
   // configuration setttings for map generation
-  public int seed;
-  public int mapSize;
-  public float scale = 5f;
-  public float lacunarity = 1f;
-  public float persistance = 1f;
-  public int octaves = 1;
-  public string noiseType;
-  public TerrainType[] terrainConfigs;
   public GameObject Chunks;
 
   private NoiseMapService NoiseMapService;
@@ -21,7 +12,7 @@ public class WorldEngine : MonoBehaviour
   void Start()
   {
     // initialize services
-    NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+    NoiseMapService = GetComponent<NoiseMapService>();
 
     // initialize other services
 
@@ -34,22 +25,26 @@ public class WorldEngine : MonoBehaviour
   public void generateWorld(dynamic parameters, dynamic dummy) {
     // debugging instances only
     MeshService = GetComponent<MeshService>();
-    NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+    NoiseMapService = GetComponent<NoiseMapService>();
 
     // debugging instances only
 
     ClearChunks();
 
     generateChunk(0, 0);
-    // generateChunk(1, 0);
+    generateChunk(1, 0);
     // generateChunk(0, 1);
     // generateChunk(1, 1);
+
+    var LakeService = GetComponent<LakeService>();
+    LakeService.generateLakes(0, 0);
+    LakeService.generateLakes(1, 0);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
     // debugging instances only
     MeshService = GetComponent<MeshService>();
-    NoiseMapService = new NoiseMapService(seed, mapSize, mapSize, scale, persistance, lacunarity, octaves);
+    NoiseMapService = GetComponent<NoiseMapService>();
     // debugging instances only
 
     GameObject chunk = loadChunk(chunkX, chunkY);
@@ -59,10 +54,10 @@ public class WorldEngine : MonoBehaviour
     var mesh = meshFilter.mesh;
 
     // Noise Map Provider for all types of Noises
-    float[,] noiseMap = NoiseMapService.getNoiseMap(noiseType, chunkX, chunkY);
+    float[,] noiseMap = NoiseMapService.getNoiseMap(chunkX, chunkY);
 
     // generate the new mesh
-    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, mapSize, noiseMap);
+    meshFilter.sharedMesh = MeshService.GenerateMesh(mesh, NoiseMapService.mapSize, noiseMap);
 
     // destroy the previous mesh collider 
     DestroyImmediate(chunk.GetComponent<MeshCollider>());
@@ -71,7 +66,7 @@ public class WorldEngine : MonoBehaviour
     chunk.AddComponent<MeshCollider>();
 
     // render mesh texture
-    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, MeshService.heightCurve, noiseMap);
+    Texture2D meshTexture = NoiseMapService.getNoiseTexture(MeshService.heightCurve, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
 
     // notify other modules in the generator that the terrain is complete
@@ -90,7 +85,7 @@ public class WorldEngine : MonoBehaviour
     if (chunkTransform == null) {
       chunk = new GameObject();
       chunk.name = chunkName;
-      chunk.transform.position = new Vector3(mapSize * chunkX, 0, mapSize * chunkY);
+      chunk.transform.position = new Vector3(NoiseMapService.mapSize * chunkX, 0, NoiseMapService.mapSize * chunkY);
       chunk.transform.parent = Chunks.transform;
     } else {
       chunk = chunkTransform.gameObject;
@@ -116,13 +111,4 @@ public class WorldEngine : MonoBehaviour
     freshChunk.name = "Chunks";
     Chunks = freshChunk;
   }
-
-  // private void OnDrawGizmos() {
-  //     if (debugMesh != null && debugMesh.vertices != null) {
-  //         Gizmos.color = Color.red;
-  //         for (var i = 0; i < debugMesh.vertices.Length; i++) {
-  //             Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
-  //         }
-  //     }
-  // }
 }

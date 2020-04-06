@@ -6,6 +6,7 @@ using System;
 public static class KMeansClustering {
   
     public static float MIN_NONDUPLICATE_DISTANCE = 50f;
+    public static int MAX_ATTEMPTS = 5;
   public static Dictionary<Vector2, List<Vector2>> cluster(int k, Dictionary<Vector2, List<Vector2>> clusterPoints, List<Vector2> points, int mapSize, int attempts) {
     bool hasShifted = false;
     
@@ -67,31 +68,48 @@ public static class KMeansClustering {
 
     attempts++;
 
-    if (hasShifted && attempts < 100) {
+    if (hasShifted && attempts < MAX_ATTEMPTS) {
       return cluster(k, newClusters, points, mapSize, attempts);
     } else {
-      newClusters = removeDuplicateClusters(newClusters);
-      return newClusters;
+      //clusterPoints = removeDuplicateClusters(clusterPoints);
+      return clusterPoints;
     }
   }
-  public static Dictionary<Vector2, List<Vector2>> removeDuplicateClusters(Dictionary<Vector2, List<Vector2>> unSanitizedClusters) {
-    Dictionary<Vector2, List<Vector2>> sanitizedClusters = new Dictionary<Vector2, List<Vector2>>();
+  // public static Dictionary<Vector2, List<Vector2>> removeDuplicateClusters(Dictionary<Vector2, List<Vector2>> unSanitizedClusters) {
+  //   for (var i = 0; i < unSanitizedClusters.Count; i++) {
+  //     var current = unSanitizedClusters.ElementAt(i);
+  //     var neighbors = new List<Vector2>();
 
-    foreach(var clusterToAdd in unSanitizedClusters) {
-      bool isDuplicate = false;
-      foreach(var clusterToTest in sanitizedClusters) {
-        if (Vector2.Distance(clusterToTest.Key, clusterToAdd.Key) < MIN_NONDUPLICATE_DISTANCE) {
-          isDuplicate = true;
-        }
-      }
+  //     foreach(var cluster in unSanitizedClusters) {
+  //       if (cluster.Key != current.Key 
+  //         && cluster.Value.Count != 0
+  //         && Vector2.Distance(current.Key, cluster.Key) < MIN_NONDUPLICATE_DISTANCE) {
+  //         neighbors.Add(cluster.Key); 
+  //       }
+  //     }
 
-      if (isDuplicate == false) {
-        sanitizedClusters.Add(clusterToAdd.Key, clusterToAdd.Value);
-      }
-    }
+  //     for (var j = 0; j < neighbors.Count; j++) {
+  //       var neighborValues = unSanitizedClusters[neighbors[j]];
+  //       var newCurrentValues = current.Value.Concat(neighborValues).ToList();
+      
+  //       // readd the new values
+  //       unSanitizedClusters[current.Key] = newCurrentValues;
 
-    return sanitizedClusters;
-  }
+  //       // remove the neighbor
+  //       unSanitizedClusters[neighbors[j]] = new List<Vector2>();
+  //     }
+  //   }
+
+  //   // filter out all of the empty values
+  //   for (var i = 0; i < 50; i++) {
+  //     var current = unSanitizedClusters.ElementAt(i);
+  //     if (current.Value.Count == 0) {
+  //       unSanitizedClusters.Remove(current.Key);
+  //     }
+  //   }
+
+  //   return unSanitizedClusters;
+  // }
 
   public static Vector3 LerpByDistance(Vector3 A, Vector3 B, float x)
   {
