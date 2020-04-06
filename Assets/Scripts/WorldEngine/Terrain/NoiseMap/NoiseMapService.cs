@@ -8,6 +8,7 @@ public class NoiseMapService : MonoBehaviour {
   public float scale = 5f;
   public float lacunarity = 1f;
   public float persistance = 1f;
+  public TerrainType[] terrainConfigs;
   public int octaves = 1;
   public string noiseType;
   PerlinNoiseMap PerlinNoise;
@@ -53,12 +54,12 @@ public class NoiseMapService : MonoBehaviour {
     return noiseMap;
   }
 
-  public Texture2D getNoiseTexture(TerrainType[] terrainConfig, AnimationCurve heightCurve, float[,] noiseMap) {
-    return NoiseRenderer.BuildTexture(terrainConfig, heightCurve, noiseMap);
+  public Texture2D getNoiseTexture(AnimationCurve heightCurve, float[,] noiseMap) {
+    return NoiseRenderer.BuildTexture(terrainConfigs, heightCurve, noiseMap);
   }
 
-  public Color[] getNoiseColorMap(TerrainType[] terrainConfig, AnimationCurve heightCurve, float[,] noiseMap) {
-    return NoiseRenderer.BuildPixelData(terrainConfig, heightCurve, noiseMap);
+  public Color[] getNoiseColorMap(AnimationCurve heightCurve, float[,] noiseMap) {
+    return NoiseRenderer.BuildPixelData(terrainConfigs, heightCurve, noiseMap);
   }
   public float[,] getCachedNoiseMap(int chunkX, int chunkY) {
     var index = Utils.getChunkName(chunkX, chunkY);
@@ -68,5 +69,14 @@ public class NoiseMapService : MonoBehaviour {
     } else {
       return new float[0,0];
     }
+  }
+
+  public float getTerrainLevel(string name) {
+    for (var i = 0; i < terrainConfigs.Length; i++) {
+      if (name == terrainConfigs[i].name) {
+        return terrainConfigs[i].threshold;
+      }
+    }
+    return -1f;
   }
 }

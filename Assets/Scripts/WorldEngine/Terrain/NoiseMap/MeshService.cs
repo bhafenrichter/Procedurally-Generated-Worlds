@@ -1,7 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections;
-
 public class MeshService : MonoBehaviour {
   public float heightMultipler;
   public AnimationCurve heightCurve;

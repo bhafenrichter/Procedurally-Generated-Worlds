@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class LakeService : MonoBehaviour {
+  private WorldEngine WorldEngine;
   private NoiseMapService NoiseMapService;
 
   private MeshService MeshService;
@@ -13,22 +14,23 @@ public class LakeService : MonoBehaviour {
   public Texture lakeTexture;
   void Start()
   {
+      WorldEngine = GetComponent<WorldEngine>();
       NoiseMapService = GetComponent<NoiseMapService>();
       MeshService = GetComponent<MeshService>();
-      EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD_COMPLETE, generateLakes);
 
-      debugPoints = new List<Vector3>();
+      EventBus.Manager.Subscribe(EventBus.Actions.GENERATE_WORLD_COMPLETE, generateLakes);
   }
 
   public void generateLakes(dynamic chunkX, dynamic chunkY) {
-    debugPoints.Clear();
     // run kmeans to find the lake points
     Dictionary<Vector2, List<Vector2>> lakeClusters = new Dictionary<Vector2, List<Vector2>>();
     float[,] chunkNoiseMap = NoiseMapService.getCachedNoiseMap(chunkX, chunkY);
     int mapSize = chunkNoiseMap.GetLength(0);
     GameObject chunk = GameObject.Find(Utils.getChunkName(chunkX, chunkY));
-
-    List<Vector2> mountainPoints = Utils.getPointsAtThreshold(chunkNoiseMap, 0.4f, "<");
+    float heightMultipler = MeshService.heightMultipler;
+    float seaLevel = NoiseMapService.getTerrainLevel("Water");
+    float beachLevel = NoiseMapService.getTerrainLevel("Beach");
+    List<Vector2> mountainPoints = Utils.getPointsAtThreshold(chunkNoiseMap, beachLevel * 2, "<");
     lakeClusters = KMeansClustering.cluster(50, null, mountainPoints, mapSize, 0);
 
     // send 4 runners in 4 directions to get the dimensions of the lake
@@ -52,18 +54,13 @@ public class LakeService : MonoBehaviour {
 
       // find the highest y
       topRightCorner.y = clusterPoints.OrderByDescending(x => x.y).FirstOrDefault().y;
-
-      // build square based on extremes
-      // debugPoints.Add(bottomleftCorner);
-      // debugPoints.Add(topRightCorner);
-
       
       // generate the mesh based on the 4 bounds of the square
       List<Vector3> points = new List<Vector3>();
-      points.Add(new Vector3(bottomleftCorner.x, 0, bottomleftCorner.y));
-      points.Add(new Vector3(topRightCorner.x, 0, bottomleftCorner.y));
-      points.Add(new Vector3(bottomleftCorner.x, 0, topRightCorner.y));
-      points.Add(new Vector3(topRightCorner.x, 0, topRightCorner.y));
+      points.Add(new Vector3(bottomleftCorner.x - 1, 0, bottomleftCorner.y - 1));
+      points.Add(new Vector3(topRightCorner.x + 1, 0, bottomleftCorner.y - 1));
+      points.Add(new Vector3(bottomleftCorner.x - 1, 0, topRightCorner.y + 1));
+      points.Add(new Vector3(topRightCorner.x + 1, 0, topRightCorner.y + 1));
       
       var lake = new GameObject();
       var MeshFilter = lake.AddComponent<MeshFilter>();
@@ -71,11 +68,13 @@ public class LakeService : MonoBehaviour {
       MeshRenderer.material = lakeMaterial;
       MeshRenderer.material.shader = lakeShader;
       MeshRenderer.material.mainTexture = lakeTexture;
+
       var Mesh = MeshService.generateMeshFromPoints(points);
       MeshFilter.mesh = Mesh;
       lake.transform.parent = chunk.transform;
+
       // CONSTANT: sea level * height multiplier
-      lake.transform.position = new Vector3(-lake.transform.position.x, -lake.transform.position.y + (0.1f * 100), -lake.transform.position.z);
+      lake.transform.position = new Vector3(-lake.transform.position.x + (mapSize * chunkX), -lake.transform.position.y + (seaLevel * heightMultipler), -lake.transform.position.z + (mapSize * chunkY));
     }
 
 

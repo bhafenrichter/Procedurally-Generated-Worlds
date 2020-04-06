@@ -3,7 +3,6 @@
 public class WorldEngine : MonoBehaviour
 {
   // configuration setttings for map generation
-  public TerrainType[] terrainConfigs;
   public GameObject Chunks;
 
   private NoiseMapService NoiseMapService;
@@ -33,12 +32,13 @@ public class WorldEngine : MonoBehaviour
     ClearChunks();
 
     generateChunk(0, 0);
-    // generateChunk(1, 0);
+    generateChunk(1, 0);
     // generateChunk(0, 1);
     // generateChunk(1, 1);
 
     var LakeService = GetComponent<LakeService>();
     LakeService.generateLakes(0, 0);
+    LakeService.generateLakes(1, 0);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
@@ -66,7 +66,7 @@ public class WorldEngine : MonoBehaviour
     chunk.AddComponent<MeshCollider>();
 
     // render mesh texture
-    Texture2D meshTexture = NoiseMapService.getNoiseTexture(terrainConfigs, MeshService.heightCurve, noiseMap);
+    Texture2D meshTexture = NoiseMapService.getNoiseTexture(MeshService.heightCurve, noiseMap);
     textureRenderer.material.mainTexture = meshTexture;
 
     // notify other modules in the generator that the terrain is complete
