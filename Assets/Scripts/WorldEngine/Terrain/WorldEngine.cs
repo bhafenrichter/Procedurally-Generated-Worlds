@@ -111,13 +111,4 @@ public class WorldEngine : MonoBehaviour
     freshChunk.name = "Chunks";
     Chunks = freshChunk;
   }
-
-  // private void OnDrawGizmos() {
-  //     if (debugMesh != null && debugMesh.vertices != null) {
-  //         Gizmos.color = Color.red;
-  //         for (var i = 0; i < debugMesh.vertices.Length; i++) {
-  //             Gizmos.DrawSphere(debugMesh.vertices[i], 0.1f);
-  //         }
-  //     }
-  // }
 }

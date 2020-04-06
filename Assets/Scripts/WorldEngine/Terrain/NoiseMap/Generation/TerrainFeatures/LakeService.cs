@@ -12,6 +12,7 @@ public class LakeService : MonoBehaviour {
   public Shader lakeShader;
   public Material lakeMaterial;
   public Texture lakeTexture;
+  public int MESH_PADDING = 1;
   void Start()
   {
       WorldEngine = GetComponent<WorldEngine>();
@@ -31,7 +32,20 @@ public class LakeService : MonoBehaviour {
     float seaLevel = NoiseMapService.getTerrainLevel("Water");
     float beachLevel = NoiseMapService.getTerrainLevel("Beach");
     List<Vector2> mountainPoints = Utils.getPointsAtThreshold(chunkNoiseMap, beachLevel * 2, "<");
+    List<MeshFilter> meshes = new List<MeshFilter>();
+
     lakeClusters = KMeansClustering.cluster(50, null, mountainPoints, mapSize, 0);
+
+    // instantiate lakes game object
+    var lakeMesh = new GameObject();
+    lakeMesh.name = "Lakes";
+    lakeMesh.transform.parent = chunk.transform; 
+    // placeholder for final mesh
+    lakeMesh.AddComponent<MeshFilter>();
+    var MeshRenderer = lakeMesh.AddComponent<MeshRenderer>();
+    MeshRenderer.material = lakeMaterial;
+    MeshRenderer.material.shader = lakeShader;
+    MeshRenderer.material.mainTexture = lakeTexture;
 
     // send 4 runners in 4 directions to get the dimensions of the lake
     foreach(var cluster in lakeClusters) {
@@ -40,9 +54,6 @@ public class LakeService : MonoBehaviour {
       Vector2 topRightCorner = new Vector2();
       List<Vector2> clusterPoints = cluster.Value;
 
-      // foreach(var clusterPoint in clusterPoints) {
-      //   debugPoints.Add(clusterPoint);
-      // }
       // find the lowest x
       bottomleftCorner.x = clusterPoints.OrderBy(x => x.x).FirstOrDefault().x;
 
@@ -57,27 +68,26 @@ public class LakeService : MonoBehaviour {
       
       // generate the mesh based on the 4 bounds of the square
       List<Vector3> points = new List<Vector3>();
-      points.Add(new Vector3(bottomleftCorner.x - 1, 0, bottomleftCorner.y - 1));
-      points.Add(new Vector3(topRightCorner.x + 1, 0, bottomleftCorner.y - 1));
-      points.Add(new Vector3(bottomleftCorner.x - 1, 0, topRightCorner.y + 1));
-      points.Add(new Vector3(topRightCorner.x + 1, 0, topRightCorner.y + 1));
+      points.Add(new Vector3(bottomleftCorner.x - MESH_PADDING, 0, bottomleftCorner.y - MESH_PADDING));
+      points.Add(new Vector3(topRightCorner.x + MESH_PADDING, 0, bottomleftCorner.y - MESH_PADDING));
+      points.Add(new Vector3(bottomleftCorner.x - MESH_PADDING, 0, topRightCorner.y + MESH_PADDING));
+      points.Add(new Vector3(topRightCorner.x + MESH_PADDING, 0, topRightCorner.y + MESH_PADDING));
       
       var lake = new GameObject();
       var MeshFilter = lake.AddComponent<MeshFilter>();
-      var MeshRenderer = lake.AddComponent<MeshRenderer>();
-      MeshRenderer.material = lakeMaterial;
-      MeshRenderer.material.shader = lakeShader;
-      MeshRenderer.material.mainTexture = lakeTexture;
 
       var Mesh = MeshService.generateMeshFromPoints(points);
       MeshFilter.mesh = Mesh;
-      lake.transform.parent = chunk.transform;
+      lake.transform.parent = lakeMesh.transform;
 
-      // CONSTANT: sea level * height multiplier
-      lake.transform.position = new Vector3(-lake.transform.position.x + (mapSize * chunkX), -lake.transform.position.y + (seaLevel * heightMultipler), -lake.transform.position.z + (mapSize * chunkY));
+      lake.transform.position = new Vector3(
+        -lake.transform.position.x + (mapSize * chunkX), 
+        -lake.transform.position.y + (seaLevel * heightMultipler), 
+        -lake.transform.position.z + (mapSize * chunkY));
     }
 
-
+    // combine all lakes into one mesh
+    MeshService.combineMeshes(lakeMesh);
   }
 
   private void OnDrawGizmos() {

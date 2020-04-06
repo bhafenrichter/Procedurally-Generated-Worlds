@@ -118,12 +118,30 @@ public class MeshService : MonoBehaviour {
     return msh;
   }
 
-      private void OnDrawGizmos() {
-        if (debugMesh != null) {
-            Gizmos.color = Color.red;
-            for (var i = 0; i < debugMesh.Count; i++) {
-                Gizmos.DrawSphere(debugMesh[i], 0.5f);
-            }
+  internal void combineMeshes(GameObject parent) {
+    MeshFilter[] meshFilters = parent.GetComponentsInChildren<MeshFilter>();
+    CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+
+    int i = 0;
+    while (i < meshFilters.Length)
+    {
+        combine[i].mesh = meshFilters[i].sharedMesh;
+        combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+        meshFilters[i].gameObject.SetActive(false);
+
+        i++;
+    }
+    parent.transform.GetComponent<MeshFilter>().mesh = new Mesh();
+    parent.transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+    parent.transform.gameObject.SetActive(true);
+  }
+
+  private void OnDrawGizmos() {
+    if (debugMesh != null) {
+        Gizmos.color = Color.red;
+        for (var i = 0; i < debugMesh.Count; i++) {
+            Gizmos.DrawSphere(debugMesh[i], 0.5f);
         }
     }
+}
 }
