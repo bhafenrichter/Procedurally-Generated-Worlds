@@ -33,12 +33,8 @@ public class WorldEngine : MonoBehaviour
 
     generateChunk(0, 0);
     generateChunk(1, 0);
-    // generateChunk(0, 1);
-    // generateChunk(1, 1);
 
     var LakeService = GetComponent<LakeService>();
-    LakeService.generateLakes(0, 0);
-    LakeService.generateLakes(1, 0);
   }
 
   public Mesh generateChunk(int chunkX, int chunkY) {
@@ -70,7 +66,7 @@ public class WorldEngine : MonoBehaviour
     textureRenderer.material.mainTexture = meshTexture;
 
     // notify other modules in the generator that the terrain is complete
-    // EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);
+    EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);
 
     return mesh;
   }

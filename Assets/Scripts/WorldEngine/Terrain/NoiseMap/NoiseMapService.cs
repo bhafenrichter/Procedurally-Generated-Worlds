@@ -15,11 +15,10 @@ public class NoiseMapService : MonoBehaviour {
   SimplexNoiseMap SimplexNoise;
   
   NoiseMapRenderer NoiseRenderer;
-  Dictionary<string, float[,]> cachedNoiseMaps;
+  Dictionary<string, float[,]> cachedNoiseMaps = new Dictionary<string, float[,]>();
   private void Start() {
     // initialize renderer
     NoiseRenderer = new NoiseMapRenderer();
-    cachedNoiseMaps = new Dictionary<string, float[,]>();
   }
 
   public float[,] getNoiseMap(int chunkX, int chunkY) {

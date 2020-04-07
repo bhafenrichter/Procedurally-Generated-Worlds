@@ -74,7 +74,7 @@ public class MeshService : MonoBehaviour {
     mesh.uv = uvs;
 
     // recalculate mesh based on new verticles
-    mesh.RecalculateNormals();
+    // mesh.RecalculateNormals();
     
     return mesh;
   }
