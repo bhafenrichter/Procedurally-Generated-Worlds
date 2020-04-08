@@ -9,9 +9,7 @@ public class LakeService : MonoBehaviour {
   private MeshService MeshService;
 
   private List<Vector3> debugPoints;
-  public Shader lakeShader;
-  public Material lakeMaterial;
-  public Texture lakeTexture;
+  public Material lakeMaterial;  
   public int MESH_PADDING = 1;
   void Start()
   {
@@ -44,8 +42,6 @@ public class LakeService : MonoBehaviour {
     lakeMesh.AddComponent<MeshFilter>();
     var MeshRenderer = lakeMesh.AddComponent<MeshRenderer>();
     MeshRenderer.material = lakeMaterial;
-    MeshRenderer.material.shader = lakeShader;
-    MeshRenderer.material.mainTexture = lakeTexture;
 
     // send 4 runners in 4 directions to get the dimensions of the lake
     foreach(var cluster in lakeClusters) {
@@ -75,6 +71,8 @@ public class LakeService : MonoBehaviour {
       
       var lake = new GameObject();
       var MeshFilter = lake.AddComponent<MeshFilter>();
+      var testRenderer = lake.AddComponent<MeshRenderer>();
+      testRenderer.material = lakeMaterial;
 
       var Mesh = MeshService.generateMeshFromPoints(points);
       MeshFilter.mesh = Mesh;
@@ -87,7 +85,7 @@ public class LakeService : MonoBehaviour {
     }
 
     // combine all lakes into one mesh
-    MeshService.combineMeshes(lakeMesh);
+    // MeshService.combineMeshes(lakeMesh);
   }
 
   private void OnDrawGizmos() {
