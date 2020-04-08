@@ -74,7 +74,8 @@ public class MeshService : MonoBehaviour {
     mesh.uv = uvs;
 
     // recalculate mesh based on new verticles
-    // mesh.RecalculateNormals();
+    mesh.RecalculateBounds();
+    mesh.RecalculateNormals();
     
     return mesh;
   }
@@ -113,8 +114,8 @@ public class MeshService : MonoBehaviour {
     msh.vertices = points.ToArray();
     msh.triangles = triangles.ToArray();
 
-    // msh.RecalculateNormals();
-    // msh.RecalculateBounds();
+    msh.RecalculateNormals();
+    msh.RecalculateBounds();
     return msh;
   }
 
