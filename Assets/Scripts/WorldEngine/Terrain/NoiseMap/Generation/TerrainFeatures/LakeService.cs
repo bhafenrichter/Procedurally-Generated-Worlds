@@ -64,6 +64,8 @@ public class LakeService : MonoBehaviour {
       
       // generate the mesh based on the 4 bounds of the square
       List<Vector3> points = new List<Vector3>();
+
+      // shader calculations require more than 4 vertices, lets break it up into increments of 1
       points.Add(new Vector3(bottomleftCorner.x - MESH_PADDING, 0, bottomleftCorner.y - MESH_PADDING));
       points.Add(new Vector3(topRightCorner.x + MESH_PADDING, 0, bottomleftCorner.y - MESH_PADDING));
       points.Add(new Vector3(bottomleftCorner.x - MESH_PADDING, 0, topRightCorner.y + MESH_PADDING));
@@ -85,7 +87,7 @@ public class LakeService : MonoBehaviour {
     }
 
     // combine all lakes into one mesh
-    // MeshService.combineMeshes(lakeMesh);
+    MeshService.combineMeshes(lakeMesh);
   }
 
   private void OnDrawGizmos() {

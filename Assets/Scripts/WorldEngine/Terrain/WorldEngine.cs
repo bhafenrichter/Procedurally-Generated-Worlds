@@ -33,7 +33,7 @@ public class WorldEngine : MonoBehaviour
     ClearChunks();
 
     generateChunk(0, 0);
-    generateChunk(1, 0);
+    // generateChunk(1, 0);
 
     var LakeService = GetComponent<LakeService>();
   }
@@ -65,7 +65,8 @@ public class WorldEngine : MonoBehaviour
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(MeshService.heightCurve, noiseMap);
     textureRenderer.material = terrainMaterial;
-    textureRenderer.material.mainTexture = meshTexture;
+    textureRenderer.material.SetTexture("Texture2D_D8FA1FD4", meshTexture);
+    // textureRenderer.material.mainTexture = meshTexture;
 
     // notify other modules in the generator that the terrain is complete
     EventBus.Manager.Broadcast(EventBus.Actions.GENERATE_WORLD_COMPLETE, chunkX, chunkY);

@@ -113,8 +113,8 @@ public class MeshService : MonoBehaviour {
     msh.vertices = points.ToArray();
     msh.triangles = triangles.ToArray();
 
-    msh.RecalculateNormals();
-    msh.RecalculateBounds();
+    // msh.RecalculateNormals();
+    // msh.RecalculateBounds();
     return msh;
   }
 
