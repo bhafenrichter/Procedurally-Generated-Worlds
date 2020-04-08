@@ -8,6 +8,7 @@ public class WorldEngine : MonoBehaviour
   private NoiseMapService NoiseMapService;
   private MeshService MeshService;
   private Mesh debugMesh;
+  public Material terrainMaterial;
   
   void Start()
   {
@@ -63,6 +64,7 @@ public class WorldEngine : MonoBehaviour
 
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(MeshService.heightCurve, noiseMap);
+    textureRenderer.material = terrainMaterial;
     textureRenderer.material.mainTexture = meshTexture;
 
     // notify other modules in the generator that the terrain is complete

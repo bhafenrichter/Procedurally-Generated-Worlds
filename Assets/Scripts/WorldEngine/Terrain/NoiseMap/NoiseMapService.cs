@@ -18,7 +18,7 @@ public class NoiseMapService : MonoBehaviour {
   Dictionary<string, float[,]> cachedNoiseMaps = new Dictionary<string, float[,]>();
   private void Start() {
     // initialize renderer
-    NoiseRenderer = new NoiseMapRenderer();
+    NoiseRenderer = GetComponent<NoiseMapRenderer>();
   }
 
   public float[,] getNoiseMap(int chunkX, int chunkY) {
@@ -54,10 +54,12 @@ public class NoiseMapService : MonoBehaviour {
   }
 
   public Texture2D getNoiseTexture(AnimationCurve heightCurve, float[,] noiseMap) {
+    NoiseRenderer = GetComponent<NoiseMapRenderer>();
     return NoiseRenderer.BuildTexture(terrainConfigs, heightCurve, noiseMap);
   }
 
   public Color[] getNoiseColorMap(AnimationCurve heightCurve, float[,] noiseMap) {
+    NoiseRenderer = GetComponent<NoiseMapRenderer>();
     return NoiseRenderer.BuildPixelData(terrainConfigs, heightCurve, noiseMap);
   }
   public float[,] getCachedNoiseMap(int chunkX, int chunkY) {

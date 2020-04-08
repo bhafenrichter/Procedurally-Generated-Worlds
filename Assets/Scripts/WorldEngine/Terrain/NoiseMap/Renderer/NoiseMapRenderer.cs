@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class NoiseMapRenderer
+public class NoiseMapRenderer : MonoBehaviour
 {
   internal Texture2D BuildTexture(TerrainType[] terrainConfigs, AnimationCurve heightCurve, float[,] heightMap)
   {
