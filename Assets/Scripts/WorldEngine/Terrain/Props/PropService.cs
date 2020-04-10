@@ -7,6 +7,10 @@ public class PropService : MonoBehaviour {
 
   [Range(0, 1)]
   public float maxPropHeightThreshold;
+  public float minScaleThreshold;
+
+  public float maxScaleThreshold;
+  public float scaleMultipler;
   public string propName;
   public float propRadius;
   public GameObject[] propPrefabs;
@@ -36,21 +40,25 @@ public class PropService : MonoBehaviour {
       trees.transform.parent = chunk.transform;
     }    
 
-    ClearTrees(trees);
+    ClearProps(trees);
 
     // generate points for trees
-    Vector3[] treePoints = generateTreePoints(chunkX, chunkY, precision, heightMultipler, meshVertices);
+    Vector3[] treePoints = generatePropPoints(chunkX, chunkY, precision, heightMultipler, meshVertices);
 
     for (var i = 0; i < treePoints.Length; i++) {
       int seed = UnityEngine.Random.Range(0, propPrefabs.Length);
+      float scaleHeight = UnityEngine.Random.Range(minScaleThreshold, maxScaleThreshold);
+
       Vector3 position = new Vector3(treePoints[i].x, treePoints[i].y, treePoints[i].z);
       GameObject tree = GameObject.Instantiate(propPrefabs[seed], position, propPrefabs[seed].transform.rotation);
       tree.transform.parent = trees.transform;
+      tree.transform.localScale = new Vector3(scaleHeight, scaleHeight, scaleHeight);
+      
     }
     trees.transform.position = new Vector3(chunkX * (mapSize * precision), 0, chunkY * (mapSize * precision));
   }
 
-  internal Vector3[] generateTreePoints(int chunkX, int chunkY, int precision, float heightMultiplier, Vector3[] vertices) {
+  internal Vector3[] generatePropPoints(int chunkX, int chunkY, int precision, float heightMultiplier, Vector3[] vertices) {
     // use poisson disk sampling to generate clustered points
     // multiply by vertex percision
     int mapSize = ((int) Mathf.Sqrt(vertices.Length) - 1);
@@ -78,8 +86,8 @@ public class PropService : MonoBehaviour {
     return trees.ToArray();
   }
 
-  public void ClearTrees(GameObject trees) {
-    foreach(Transform child in trees.transform)
+  public void ClearProps(GameObject props) {
+    foreach(Transform child in props.transform)
     {
         DestroyImmediate(child.gameObject);
     }
