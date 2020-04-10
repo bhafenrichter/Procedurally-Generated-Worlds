@@ -11,6 +11,7 @@ public class LakeService : MonoBehaviour {
   private List<Vector3> debugPoints;
   public Material lakeMaterial;  
   public int MESH_PADDING = 1;
+  public bool IS_COMBINE_MESHES = true;
   void Start()
   {
       WorldEngine = GetComponent<WorldEngine>();
@@ -87,7 +88,10 @@ public class LakeService : MonoBehaviour {
     }
 
     // combine all lakes into one mesh
-    MeshService.combineMeshes(lakeMesh);
+    if (IS_COMBINE_MESHES == true) {
+      MeshService.combineMeshes(lakeMesh);
+    }
+    
   }
 
   private void OnDrawGizmos() {
