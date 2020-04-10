@@ -65,6 +65,7 @@ public class WorldEngine : MonoBehaviour
     // render mesh texture
     Texture2D meshTexture = NoiseMapService.getNoiseTexture(MeshService.heightCurve, noiseMap);
     textureRenderer.material = terrainMaterial;
+    textureRenderer.receiveShadows = true;
     // must be the correct name of the property on the shader file
     // https://answers.unity.com/questions/1484363/setting-unitys-new-shader-graphs-properties-via-c.html
     textureRenderer.material.SetTexture("BaseTexture", meshTexture);

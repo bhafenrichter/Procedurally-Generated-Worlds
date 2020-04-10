@@ -156,7 +156,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -316,7 +316,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &574217735
 Transform:
   m_ObjectHideFlags: 0
@@ -345,6 +345,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minPropHeightThreshold: 0.2
   maxPropHeightThreshold: 0.5
+  minScaleThreshold: 1
+  maxScaleThreshold: 3
+  scaleMultipler: 0
   propName: Flora
   propRadius: 5
   propPrefabs:
@@ -439,7 +442,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &740173625
 Transform:
   m_ObjectHideFlags: 0
@@ -468,6 +471,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minPropHeightThreshold: 0.2
   maxPropHeightThreshold: 0.5
+  minScaleThreshold: 1
+  maxScaleThreshold: 3
+  scaleMultipler: 0
   propName: Bush
   propRadius: 10
   propPrefabs:
@@ -817,7 +823,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1277445887
 Transform:
   m_ObjectHideFlags: 0
@@ -846,6 +852,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minPropHeightThreshold: 0.3
   maxPropHeightThreshold: 1
+  minScaleThreshold: 1
+  maxScaleThreshold: 5
+  scaleMultipler: 0
   propName: Rocks
   propRadius: 2
   propPrefabs:
@@ -1094,6 +1103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lakeMaterial: {fileID: 2100000, guid: ba5499e5856ca194e94fbdca421acb50, type: 2}
   MESH_PADDING: 1
+  IS_COMBINE_MESHES: 1
 --- !u!114 &1626639269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1391,7 +1401,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2006627431
 Transform:
   m_ObjectHideFlags: 0
@@ -1420,6 +1430,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minPropHeightThreshold: 0.15
   maxPropHeightThreshold: 0.5
+  minScaleThreshold: 1
+  maxScaleThreshold: 5
+  scaleMultipler: 0
   propName: Trees
   propRadius: 5
   propPrefabs:
